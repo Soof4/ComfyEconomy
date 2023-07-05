@@ -1,4 +1,5 @@
-﻿using NuGet.Protocol.Plugins;
+﻿using Microsoft.Xna.Framework;
+using NuGet.Protocol.Plugins;
 using Steamworks;
 using System;
 using System.Collections.Generic;
@@ -11,80 +12,104 @@ using System.Windows.Markup;
 using Terraria;
 using Terraria.Localization;
 using TShockAPI;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ComfyEconomy.Database {
     public class ShopSign {
-        public int SignID;
-        public int PosX;
-        public int PosY;
-        public TagType TagType;
-        public string Owner;
-        public int ItemId;
+
+        public int ItemID;
         public int Amount;
         public int Cost;
-        public int Stock;
+        public string Owner;
 
-        public ShopSign(int signId, int posX, int posY, TagType type, string owner, int itemId, int amount, int cost, int stock) {
-            SignID = signId;
-            PosX = posX;
-            PosY = posY;
-            TagType = type;
-            Owner = owner;
-            ItemId = itemId;
+        public ShopSign(int itemID, int amount, int cost, string owner) {
+            ItemID = itemID;
             Amount = amount;
             Cost = cost;
-            Stock = stock;
+            Owner = owner;
         }
 
 
-        public void Buy(TSPlayer buyer) {
-            if (Stock < Amount) {
-                buyer.SendErrorMessage("This sign ran out of stock.");
-                return;
+        public void Buy(TSPlayer buyer, int chestID) {
+
+            int stock = 0;
+            foreach (Item item in Main.chest[chestID].item) {
+                if (item.netID == ItemID) {
+                    stock += item.stack;
+                }
             }
 
-            Account buyerAccount, sellerAccount;
-            try {
-                buyerAccount = ComfyEconomy.dbManager.GetAccount(buyer.Name);
-                sellerAccount = ComfyEconomy.dbManager.GetAccount(Owner);
-            }
-            catch (NullReferenceException) {
-                buyer.SendErrorMessage("An error has occured.");
-                return;
-            }
-            
-            if (buyerAccount.Balance < Cost) {
-                buyer.SendErrorMessage($"You don't have enough money to buy that. Your balance is: {buyerAccount.Balance}");
-                return;
-            }
-
-            ComfyEconomy.dbManager.SaveAccount(buyer.Name, buyerAccount.Balance - Cost);
-            buyer.GiveItem(ItemId, Amount);
-            ComfyEconomy.dbManager.SaveShopSign(Stock - Amount, PosX, PosY);
-            ComfyEconomy.dbManager.SaveAccount(sellerAccount.AccountName, sellerAccount.Balance + Cost);
-            buyer.SendSuccessMessage($"Bought {Amount} {TShock.Utils.GetItemById(ItemId).Name}");
-            return;
-        }
-
-        public void Sell(TSPlayer seller) {
-
-            if (seller.SelectedItem.netID != ItemId) {
-                seller.SendErrorMessage("The item you're holding doesn't match the sign.");
-                return;
-            }
-            if (seller.SelectedItem.stack < Amount) {
-                seller.SendErrorMessage("Holding item amount is lower than sign requirement.");
+            if (stock < Amount) {
+                ComfyEconomy.SendFloatingMsg(buyer, "Ran out of stock!", 255, 50, 50);
                 return;
             }
 
             Account sellerAccount;
+            Account buyerAccount = ComfyEconomy.dbManager.GetAccount(buyer.Name);
             try {
-                sellerAccount = ComfyEconomy.dbManager.GetAccount(seller.Name);
+                sellerAccount = ComfyEconomy.dbManager.GetAccount(Owner);
             }
             catch (NullReferenceException) {
-                seller.SendErrorMessage("An error has occured.");
+                ComfyEconomy.SendFloatingMsg(buyer, "Couldn't find the owner!", 255, 50, 50);
                 return;
             }
+             
+            
+            if (buyerAccount.Balance < Cost) {
+                ComfyEconomy.SendFloatingMsg(buyer, "You don't have enough money!", 255, 50, 50);
+                return;
+            }
+
+            ComfyEconomy.dbManager.SaveAccount(buyer.Name, buyerAccount.Balance - Cost);
+            buyer.GiveItem(ItemID, Amount);
+            DeleteItemsFromChest(chestID, ItemID, Amount);
+            ComfyEconomy.dbManager.SaveAccount(sellerAccount.AccountName, sellerAccount.Balance + Cost);
+
+            ComfyEconomy.SendFloatingMsg(buyer, $"Bought {Amount} {TShock.Utils.GetItemById(ItemID).Name}", 50, 255, 50);
+
+            return;
+        }
+
+        public void ServerBuy(TSPlayer buyer) {
+
+            Account buyerAccount = ComfyEconomy.dbManager.GetAccount(buyer.Name);
+
+            if (buyerAccount.Balance < Cost) {
+                ComfyEconomy.SendFloatingMsg(buyer, "You don't have enough money!", 255, 50, 50);
+                return;
+            }
+
+            ComfyEconomy.dbManager.SaveAccount(buyer.Name, buyerAccount.Balance - Cost);
+            buyer.GiveItem(ItemID, Amount);
+
+            ComfyEconomy.SendFloatingMsg(buyer, $"Bought {Amount} {TShock.Utils.GetItemById(ItemID).Name}", 50, 255, 50);
+
+            return;
+        }
+
+
+        /*
+        public void Sell(TSPlayer seller) {
+
+            if (seller.SelectedItem.netID != ItemID) {
+                ComfyEconomy.SendFloatingMsg(seller, "Item doesn't match!", 255, 50, 50);
+                return;
+            }
+            if (seller.SelectedItem.stack < Amount) {
+                ComfyEconomy.SendFloatingMsg(seller, "You don't have enough!", 255, 50, 50);
+                return;
+            }
+
+            Account sellerAccount = ComfyEconomy.dbManager.GetAccount(seller.Name);
+            try {
+                Account buyerAccount = ComfyEconomy.dbManager.GetAccount(Owner);
+            }
+            catch (NullReferenceException) {
+                ComfyEconomy.SendFloatingMsg(seller, "Couldn't find the owner!", 255, 50, 50);
+                return;
+            }
+
+            
 
             seller.SelectedItem.stack -= Amount;
             NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, NetworkText.FromLiteral(seller.SelectedItem.Name), seller.Index, seller.TPlayer.selectedItem);
@@ -92,57 +117,124 @@ namespace ComfyEconomy.Database {
 
             ComfyEconomy.dbManager.SaveAccount(seller.Name, sellerAccount.Balance + Cost);
 
-            seller.SendSuccessMessage($"Sold {Amount} {TShock.Utils.GetItemById(ItemId).Name}");
+            seller.SendSuccessMessage($"Sold {Amount} {TShock.Utils.GetItemById(ItemID).Name}");
             return;
         }
+        */
+        /*
+        private void PutItemsInChest(int chestıD, int itemID, int amount) {
 
-        public void Restock(TSPlayer player) {
-            if (player.SelectedItem.netID != ItemId) {
-                player.SendErrorMessage("Cannot restock. Item you're holding doesn't match.");
+        }
+        */
+        public void ServerSell(TSPlayer seller) {
+
+            if (seller.SelectedItem.netID != ItemID) {
+                ComfyEconomy.SendFloatingMsg(seller, "Item doesn't match!", 255, 50, 50);
+                return;
+            }
+            if (seller.SelectedItem.stack < Amount) {
+                ComfyEconomy.SendFloatingMsg(seller, "You don't have enough!", 255, 50, 50);
                 return;
             }
 
-            Account playerAccount;
-            try {
-                playerAccount = ComfyEconomy.dbManager.GetAccount(player.Name);
-            }
-            catch (NullReferenceException) {
-                player.SendErrorMessage("An error has occured.");
-                return;
-            }
+            Account sellerAccount = ComfyEconomy.dbManager.GetAccount(seller.Name);
 
-            ComfyEconomy.dbManager.SaveShopSign(Stock + player.SelectedItem.stack, PosX, PosY);
-            player.SelectedItem.stack = 0;
-            NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, NetworkText.FromLiteral(player.SelectedItem.Name), player.Index, player.TPlayer.selectedItem);
-            NetMessage.SendData((int)PacketTypes.PlayerSlot, player.Index, -1, NetworkText.FromLiteral(player.SelectedItem.Name), player.Index, player.TPlayer.selectedItem);
-            player.SendInfoMessage("Restocked!");
+            seller.SelectedItem.stack -= Amount;
+            NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, NetworkText.FromLiteral(seller.SelectedItem.Name), seller.Index, seller.TPlayer.selectedItem);
+            NetMessage.SendData((int)PacketTypes.PlayerSlot, seller.Index, -1, NetworkText.FromLiteral(seller.SelectedItem.Name), seller.Index, seller.TPlayer.selectedItem);
+
+            ComfyEconomy.dbManager.SaveAccount(seller.Name, sellerAccount.Balance + Cost);
+
+            ComfyEconomy.SendFloatingMsg(seller, $"Sold {Amount} {TShock.Utils.GetItemById(ItemID).Name}", 50, 255, 50);
             return;
         }
-
-        public static string StandardizeText(string text) {
+        
+        private void DeleteItemsFromChest(int chestID, int itemID, int amount) {
+            for (int i= 0; i<40; i++) {
+                Item item = Main.chest[chestID].item[i];
+                if (item.netID == itemID) {
+                    if (item.stack < amount) {
+                        amount -= item.stack;
+                        item.stack = 0;
+                        TSPlayer.All.SendData(PacketTypes.ChestItem, "", chestID, i, item.stack, item.prefix, item.netID);
+                    }
+                    else {
+                        item.stack -= amount;
+                        TSPlayer.All.SendData(PacketTypes.ChestItem, "", chestID, i, item.stack, item.prefix, item.netID);
+                        break;
+                    }
+                }
+            }
+        }
+       
+        public static string StandardizeText(string text, TSPlayer player) {
             string[] signContent = text.Split('\n');
-            if (signContent.Count() != 4) {
-                return "-Error-\nMissing lines or extra lines.";
+            if (signContent.Count() < 4) {
+                return "-Error-\nMissing lines.";
             }
-            List<Item> itemList = TShock.Utils.GetItemByIdOrName(signContent[1]);
+            
+            if (!signContent[0].Equals("-Buy-") && !player.HasPermission("comfyeco.serversign")) {
+                return "-Error-\nYou don't have permission to use this tag.";
+            }
+
+            List<Item> itemList;
             int amount;
 
-            if (!signContent[0].Equals("-Buy-") && !signContent[0].Equals("-Sell-")) {
-                return "-Error-\nInvalid shop sign tag. (Use: -Buy- or -Sell-)";
+            if (!signContent[1].StartsWith("Name:")) {    // creating from scratch
+                itemList = TShock.Utils.GetItemByIdOrName(signContent[1]);
+
+                if (itemList.Count < 1) {
+                    return "-Error-\nItem could not be found. Typo?";
+                }
+
+                if (!int.TryParse(signContent[2], out amount) || itemList[0].maxStack < amount) {
+                    return "-Error-\nAmount cannot exceed max stack amount of the item.";
+                }
+            }
+            else {    // editing an old one
+                itemList = TShock.Utils.GetItemByIdOrName(signContent[1][6..]);
+
+                if (itemList.Count < 1) {
+                    return "-Error-\nItem could not be found. Typo?";
+                }
+
+                if (!int.TryParse(signContent[2][8..], out amount) || itemList[0].maxStack < amount) {
+                    return "-Error-\nAmount cannot exceed max stack amount of the item.";
+                }
             }
 
-            if (itemList.Count < 1) {
-                return "-Error-\nItem could not be found. Typo?";
+            if (signContent[0].Equals("-Buy-")) {
+                return $"{signContent[0]}\n" +
+                    $"Name: {itemList[0].Name}\n" +
+                    $"Amount: {amount}\n" +
+                    $"Cost: {signContent[3]}\n" +
+                    $"Owner: {player.Name}";
+            }
+            else {
+                return $"{signContent[0]}\n" +
+                    $"Name: {itemList[0].Name}\n" +
+                    $"Amount: {amount}\n" +
+                    $"Cost: {signContent[3]}";
             }
 
-            if (!int.TryParse(signContent[2], out amount) || itemList[0].maxStack < amount) {
-                return "-Error-\nAmount cannot exceed max stack amount of the item.";
-                
-            }
-
-            return $"{signContent[0]}\nName: {itemList[0].Name}\nAmount: {amount}\nCost: {signContent[3]}";   
         }
 
+        public static ShopSign GetShopSign(string text) {
+            string[] lines = text.Split('\n');
+            if (lines[0].Equals("-Buy-") || lines[0].Equals("-Sell-")) {
+                return new ShopSign(TShock.Utils.GetItemByName(lines[1][6..])[0].netID,
+                int.Parse(lines[2][8..]),
+                int.Parse(lines[3][6..]),
+                lines[4][7..]
+                );
+            }
+            return new ShopSign(TShock.Utils.GetItemByName(lines[1][6..])[0].netID,
+                int.Parse(lines[2][8..]),
+                int.Parse(lines[3][6..]),
+                ""
+                );
+
+        }
         public static int GetSignIdByPos(int x, int y) {
             for (int i = 0; i < 1000; i++) {
                 if (Main.sign[i] != null && Main.sign[i].x == x && Main.sign[i].y == y) {
@@ -152,42 +244,21 @@ namespace ComfyEconomy.Database {
             return -1;
         }
 
-        public static int GetSignIdByPos2(ref int x, ref int y) {
-
-            for (int i = 0; i < 1000; i++) {
-                if (Main.sign[i] != null && Main.sign[i].x == x && Main.sign[i].y == y) {
+        public static int GetChestIdByPos(int x, int y) {
+            for (int i = 0; i < Main.maxChests; i++) {
+                if (Main.chest[i] != null && Main.chest[i].x == x && Main.chest[i].y == y) {
                     return i;
                 }
             }
-
-            for (int i = 0; i < 1000; i++) {
-                if (Main.sign[i] != null && Main.sign[i].x == x - 1 && Main.sign[i].y == y) {
-                    x--;
-                    return i;
-                }
-            }
-
-            for (int i = 0; i < 1000; i++) {
-                if (Main.sign[i] != null && Main.sign[i].x == x && Main.sign[i].y == y - 1) {
-                    y--;
-                    return i;
-                }
-            }
-
-            for (int i = 0; i < 1000; i++) {
-                if (Main.sign[i] != null && Main.sign[i].x == x - 1 && Main.sign[i].y == y - 1) {
-                    x--;
-                    y--;
-                    return i;
-                }
-            }
-
             return -1;
         }
 
     }
-    public enum TagType {
-        buy,
-        sell
+
+    public enum Tag {
+        Buy,
+        Sell,
+        ServerBuy,
+        ServerSell
     }
 }

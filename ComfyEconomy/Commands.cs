@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TShockAPI;
 using ComfyEconomy.Database;
-
+using System.Net.Mail;
 
 namespace ComfyEconomy {
     public class Commands {
@@ -35,9 +35,14 @@ namespace ComfyEconomy {
 
             payer = ComfyEconomy.dbManager.GetAccount(args.Player.Name);
 
+            if (args.Parameters.Count < 2) {
+                args.Player.SendErrorMessage("An argument was missing. Command usage: /pay [name] [amount]");
+                return;
+            }
+
             if (int.TryParse(args.Parameters[^1], out amount)) {
                 if (amount < 0) {
-                    args.Player.SendErrorMessage("Did you just try to steal someone's money?! SUSSY BAKA!");
+                    args.Player.SendErrorMessage("Cannot pay in negative values.");
                     return;
                 }
                 else if (amount > payer.Balance) {

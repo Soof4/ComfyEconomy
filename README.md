@@ -10,5 +10,4 @@ A TShock economy plugin.
 
 |Permissions|Function|
 |-----------|---------|
-|comfyeco.sellsign|To be able to place a sign with -Sell- tag.|
-|comfyeco.tester|To be able to interact with signs or use commands.|
+|comfyeco.serversign|To be able to place a sign with -S-Sell- and -S-Buy- tag.|
