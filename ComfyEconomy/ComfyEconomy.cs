@@ -109,8 +109,6 @@ namespace ComfyEconomy {
             int posY = args.Data.ReadInt16();
             int signID = ShopSign.GetSignIdByPos(posX, posY);
 
-            args.Player.SendInfoMessage($"x: {posX}, y:{posY}");
-
             if (signID == -1) {  // sign is new
                 return;
             }

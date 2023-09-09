@@ -168,6 +168,8 @@ namespace ComfyEconomy.Database {
         }
        
         public static string StandardizeText(string text, TSPlayer player) {
+            text = text.Replace("; ", "\n");
+            text = text.Replace(';', '\n');
             string[] signContent = text.Split('\n');
             if (signContent.Count() < 4) {
                 return "-Error-\nMissing lines.";
