@@ -180,7 +180,7 @@ namespace ComfyEconomy.Database {
             }
 
             List<Item> itemList;
-            int amount;
+            int amount, cost;
 
             if (!signContent[1].StartsWith("Name:")) {    // creating from scratch
                 itemList = TShock.Utils.GetItemByIdOrName(signContent[1]);
@@ -191,6 +191,10 @@ namespace ComfyEconomy.Database {
 
                 if (!int.TryParse(signContent[2], out amount) || itemList[0].maxStack < amount) {
                     return "-Error-\nAmount cannot exceed max stack amount of the item.";
+                }
+
+                if (!int.TryParse(signContent[3], out cost)) {
+                    return "-Error-\nInvalid cost.";
                 }
             }
             else {    // editing an old one
@@ -203,20 +207,24 @@ namespace ComfyEconomy.Database {
                 if (!int.TryParse(signContent[2][8..], out amount) || itemList[0].maxStack < amount) {
                     return "-Error-\nAmount cannot exceed max stack amount of the item.";
                 }
+
+                if (!int.TryParse(signContent[3], out cost)) {
+                    return "-Error-\nInvalid cost.";
+                }
             }
 
             if (signContent[0].Equals("-Buy-")) {
                 return $"{signContent[0]}\n" +
                     $"Name: {itemList[0].Name}\n" +
                     $"Amount: {amount}\n" +
-                    $"Cost: {signContent[3]}\n" +
+                    $"Cost: {cost}\n" +
                     $"Owner: {player.Name}";
             }
             else {
                 return $"{signContent[0]}\n" +
                     $"Name: {itemList[0].Name}\n" +
                     $"Amount: {amount}\n" +
-                    $"Cost: {signContent[3]}";
+                    $"Cost: {cost}";
             }
 
         }

@@ -11,22 +11,99 @@ namespace ComfyEconomy {
     public class Commands {
     
         public static void AddCommands() {
-            TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.bal", Commands.BalanceCmd, "bal", "balance") {
-                AllowServer = false,
-                HelpText = "Check your wallet."
+            TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.bal.check", Commands.BalanceCmd, "bal", "balance") {
+                AllowServer = true,
+                HelpText = "Check balance."
             });
+
+            TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.bal.admin", Commands.BalanceAdminCmd, "baladmin", "balanceadmin") {
+                AllowServer = true,
+                HelpText = "Do balance manipulation.",
+                DoLog = true
+            });
+
             TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.pay", Commands.PayCmd, "pay") {
                 AllowServer = false,
-                HelpText = "Pay someone money. Usage: /pay [name] [amount]"
+                HelpText = "Pay someone money. Usage: /pay [name] [amount]",
+                DoLog = true
             });
 
             TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.addmine", Commands.AddMineCmd, "addmine") {
                 AllowServer = false,
-                HelpText = "Create a new mine. Usage: /addmine x1 y1 x2 y2 tileId paintId"
+                HelpText = "Create a new mine. Usage: /addmine x1 y1 x2 y2 tileId paintId",
+                DoLog = true
             });
         }
+
+        private static void BalanceAdminCmd(CommandArgs args) {
+            if (args.Parameters.Count < 3) {
+                args.Player.SendErrorMessage("Not enough arguments were given to run the command. Usage: /baladmin [subcommand name] [amount] [player name]");
+                return;
+            }
+
+            string plrName = string.Join(" ", args.Parameters.GetRange(2, args.Parameters.Count - 2));
+
+            if (!int.TryParse(args.Parameters[1], out int amount)) {
+                args.Player.SendErrorMessage("Invalid amount were given.");
+                return;
+            }
+
+            Account plrAccount;
+            try {
+                plrAccount = ComfyEconomy.dbManager.GetAccount(plrName);
+            }
+            catch (NullReferenceException) {
+                args.Player.SendErrorMessage($"Couldn't find the account for {plrName}.");
+                return;
+            }
+
+            switch (args.Parameters[0].ToLower()) {
+                case "set":
+                    ComfyEconomy.dbManager.SaveAccount(plrName, amount);
+                    args.Player.SendSuccessMessage($"Successfully set {plrName}'s balance as {amount}.");
+                    return;
+                case "add":
+                    ComfyEconomy.dbManager.SaveAccount(plrName, plrAccount.Balance + amount);
+                    args.Player.SendSuccessMessage($"Successfully added {amount} to {plrName}'s balance.");
+                    return;
+                case "sub":
+                    ComfyEconomy.dbManager.SaveAccount(plrName, plrAccount.Balance - amount);
+                    args.Player.SendSuccessMessage($"Successfully subtracted {amount} from {plrName}'s balance.");
+                    return;
+                default:
+                    args.Player.SendErrorMessage("Subcommand not found.\n" +
+                        "Command usage: /baladmin [subcommand] [amount] [player name]\n" +
+                        "Subcommand list:\n" +
+                        "set: Sets player's balance to the amount.\n" +
+                        "add: Adds some amount of points to the player's balance.\n" +
+                        "sub: Subtracts some amount of points from the player's balance."
+                        );
+                    return;
+            }
+
+        }
+
         public static void BalanceCmd(CommandArgs args) {
-            args.Player.SendInfoMessage($"Your Balance is: {ComfyEconomy.dbManager.GetAccount(args.Player.Name).Balance}");
+            int balance;
+            string playerName = args.Player.Name;
+
+            if (args.Parameters.Count > 0) {
+                playerName = string.Join(" ", args.Parameters);
+            }
+            else if (!args.Player.RealPlayer) {
+                args.Player.SendErrorMessage("Only in-game players can check without giving a player name. Do this instead: /bal [player name]");
+                return;
+            }
+
+            try {
+                balance = ComfyEconomy.dbManager.GetAccount(playerName).Balance;
+            }
+            catch (NullReferenceException) {
+                args.Player.SendErrorMessage($"Couldn't find the account for {playerName}.");
+                return;
+            }
+
+            args.Player.SendInfoMessage($"{playerName}'s balance is: {balance}");
         }
         
         public static void PayCmd(CommandArgs args) {
@@ -64,6 +141,14 @@ namespace ComfyEconomy {
 
                 ComfyEconomy.dbManager.SaveAccount(payer.AccountName, payer.Balance - amount);
                 ComfyEconomy.dbManager.SaveAccount(paid.AccountName, paid.Balance + amount);
+
+                // Send success messages
+                args.Player.SendSuccessMessage($"You've paid {amount} to {paid.AccountName}.");
+
+                List<TSPlayer> paidTSPlayer = TSPlayer.FindByNameOrID($"tsn:{paid.AccountName}");
+                if (paidTSPlayer.Count > 0) {
+                    paidTSPlayer[0].SendSuccessMessage($"{payer.AccountName} has paid you {amount}.");
+                }
             }
             else {
                 args.Player.SendErrorMessage("Invalid amount of money.");

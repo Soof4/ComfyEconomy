@@ -19,20 +19,21 @@ namespace ComfyEconomy {
         public ComfyEconomy(Main game) : base(game) {
         }
         public override string Name => "ComfyEconomy";
-        public override Version Version => new Version(1, 2, 1);
+        public override Version Version => new Version(1, 2, 2);
         public override string Author => "Soofa";
         public override string Description => "Simple economy plugin.";
 
         private DateTime mineSavedTime = DateTime.UtcNow;
         public static List<Mine> mines = new();
-        private IDbConnection db;
-        public static DbManager dbManager;
+        private static IDbConnection db = new SqliteConnection(("Data Source=" + Path.Combine(TShock.SavePath, "ComfyEconomy.sqlite")));
+        public static DbManager dbManager = new DbManager(db);
         public static string configPath = Path.Combine(TShock.SavePath + "/ComfyEconomyConfig.json");
         public static Config Config = new Config();
         public override void Initialize() {
+            /*
             db = new SqliteConnection(("Data Source=" + Path.Combine(TShock.SavePath, "ComfyEconomy.sqlite")));
             dbManager = new DbManager(db);
-
+            */
             ServerApi.Hooks.NetGreetPlayer.Register(this, OnNetGreetPlayer);
             ServerApi.Hooks.GameUpdate.Register(this, OnGameUpdate);
             GetDataHandlers.Sign += OnSignChange;
@@ -50,7 +51,6 @@ namespace ComfyEconomy {
             }
         }
 
-        
         private void OnReload(ReloadEventArgs e) {
             if (File.Exists(configPath)) {
                 Config = Config.Read();
@@ -63,7 +63,9 @@ namespace ComfyEconomy {
 
         private void OnGameUpdate(EventArgs args) {
             if ((DateTime.UtcNow - mineSavedTime).TotalMinutes > Config.MineRefillIntervalInMins) {
-                TSPlayer.All.SendInfoMessage("[i:3509]  [c/ff99cc:Refilling the mines. Possible lag spike.]");
+                if (TShock.Utils.GetActivePlayerCount() > 0) {
+                    TSPlayer.All.SendInfoMessage("[i:3509]  [c/ff99cc:Refilling the mines. Possible lag spike.]");
+                }
 
                 foreach (var mine in mines) {
                     RefillMine(mine.MineID);
@@ -83,7 +85,7 @@ namespace ComfyEconomy {
             }
         }
 
-        public void OnSignChange(object sender, GetDataHandlers.SignEventArgs args) {
+        public void OnSignChange(object? sender, GetDataHandlers.SignEventArgs args) {
             if (args.Handled) {
                 return;
             }
@@ -103,7 +105,7 @@ namespace ComfyEconomy {
             }
         }
 
-        public void OnSignRead(object sender, GetDataHandlers.SignReadEventArgs args) {
+        public void OnSignRead(object? sender, GetDataHandlers.SignReadEventArgs args) {
             args.Data.Seek(0, SeekOrigin.Begin);
             int posX = args.Data.ReadInt16();
             int posY = args.Data.ReadInt16();
@@ -149,25 +151,33 @@ namespace ComfyEconomy {
             args.Handled = true;
         }
 
-        public static void RefillMine(int mineId) {
+        public static bool RefillMine(int mineId) {
+            bool isRefilled = false;
             Mine mine = ComfyEconomy.dbManager.GetMine(mineId);
             mine.PosX2++;
             mine.PosY2++;
 
-            for (int i=mine.PosX1; i<mine.PosX2; i++) {
-                for (int j=mine.PosY1; j<mine.PosY2; j++) {
-                    WorldGen.PlaceTile(i, j, mine.TileID, forced: true);
-                    WorldGen.paintTile(i, j, (byte)mine.PaintID);
+            for (int i = mine.PosX1; i < mine.PosX2; i++) {
+                for (int j = mine.PosY1; j < mine.PosY2; j++) {
+                    if (Main.tile[i, j].type != mine.TileID || Main.tile[i, j].color() != mine.PaintID) {
+                        WorldGen.PlaceTile(i, j, mine.TileID, forced: true);
+                        WorldGen.paintTile(i, j, (byte)mine.PaintID);
+                        isRefilled = true;
+                    }
                 }
             }
+            
+            if (isRefilled) {
+                TSPlayer.All.SendTileRect((short)mine.PosX1, (short)mine.PosY1, (byte)(mine.PosX2 - mine.PosX1 + 1), (byte)(mine.PosY2 - mine.PosY1 + 1));
+            }
 
-            TSPlayer.All.SendTileRect((short)mine.PosX1, (short)mine.PosY1, (byte)(mine.PosX2 - mine.PosX1 + 1), (byte)(mine.PosY2 - mine.PosY1 + 1));
+            return isRefilled;
         }
 
         public static void SendFloatingMsg(TSPlayer plr, string msg, byte r, byte g, byte b) {
             NetMessage.SendData((int)PacketTypes.CreateCombatTextExtended, -1, -1,
                 Terraria.Localization.NetworkText.FromLiteral(msg), (int)new Color(r, g, b).PackedValue,
-                plr.X, plr.Y + 32);
+                plr.X + 16, plr.Y + 32);
         }
 
         protected override void Dispose(bool disposing) {

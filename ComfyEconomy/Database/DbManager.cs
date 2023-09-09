@@ -35,6 +35,7 @@ namespace ComfyEconomy.Database {
 
 
         // ACCOUNT METHODS
+        /// <exception cref="NullReferenceException"></exception>
         public Account GetAccount(string name) {
             using var reader = _db.QueryReader("SELECT * FROM Accounts WHERE AccountName = @0", name);
             while (reader.Read()) {
@@ -61,6 +62,7 @@ namespace ComfyEconomy.Database {
 
 
         // MINE METHODS
+        /// <exception cref="NullReferenceException"></exception>
         public Mine GetMine(int id) {
             using var reader = _db.QueryReader("SELECT * FROM Mines WHERE MineID = @0", id);
             while (reader.Read()) {
@@ -77,6 +79,7 @@ namespace ComfyEconomy.Database {
             throw new NullReferenceException();
         }
 
+        /// <exception cref="NullReferenceException"></exception>
         public int GetMineIdFromX1Y1(int x1, int y1) {
             using var reader = _db.QueryReader("SELECT * FROM Mines WHERE PosX1 = @0 AND PosY1 = @1", x1, y1);
             while (reader.Read()) {
