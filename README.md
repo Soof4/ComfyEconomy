@@ -4,7 +4,8 @@ A TShock economy plugin.
 ## Permissions and Commands
 |Permissions  | Commands    |
 |-------------|-------------|
-|comfyeco.bal |bal|
+|comfyeco.bal.check |bal, balance|
+|comfyeco.bal.admin|baladmin, balanceadmin|
 |comfyeco.pay |pay|
 |comfyeco.addmine|addmine|
 
