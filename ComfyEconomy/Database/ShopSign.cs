@@ -189,8 +189,8 @@ namespace ComfyEconomy.Database {
                     return "-Error-\nItem could not be found. Typo?";
                 }
 
-                if (!int.TryParse(signContent[2], out amount) || itemList[0].maxStack < amount) {
-                    return "-Error-\nAmount cannot exceed max stack amount of the item.";
+                if (!int.TryParse(signContent[2], out amount) || itemList[0].maxStack < amount || amount < 0) {
+                    return "-Error-\nAmount cannot exceed max stack amount of the item or can't be lower than 0.";
                 }
 
                 if (!int.TryParse(signContent[3], out cost)) {
@@ -204,8 +204,8 @@ namespace ComfyEconomy.Database {
                     return "-Error-\nItem could not be found. Typo?";
                 }
 
-                if (!int.TryParse(signContent[2][8..], out amount) || itemList[0].maxStack < amount) {
-                    return "-Error-\nAmount cannot exceed max stack amount of the item.";
+                if (!int.TryParse(signContent[2][8..], out amount) || itemList[0].maxStack < amount || amount < 0) {
+                    return "-Error-\nAmount cannot exceed max stack amount of the item or can't be lower than 0.";
                 }
 
                 if (!int.TryParse(signContent[3], out cost)) {

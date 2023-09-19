@@ -19,7 +19,7 @@ namespace ComfyEconomy {
         public ComfyEconomy(Main game) : base(game) {
         }
         public override string Name => "ComfyEconomy";
-        public override Version Version => new Version(1, 2, 2);
+        public override Version Version => new Version(1, 2, 3);
         public override string Author => "Soofa";
         public override string Description => "Simple economy plugin.";
 
