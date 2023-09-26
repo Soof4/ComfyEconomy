@@ -1,16 +1,11 @@
 ﻿using ComfyEconomy.Database;
-using IL.Terraria.GameContent;
 using Microsoft.Data.Sqlite;
 using Microsoft.Xna.Framework;
-using ModFramework.Plugins;
-using System;
 using System.Data;
-using System.IO;
 using System.IO.Streams;
 using Terraria;
 using TerrariaApi.Server;
 using TShockAPI;
-using TShockAPI.Handlers;
 using TShockAPI.Hooks;
 
 namespace ComfyEconomy {
@@ -19,9 +14,9 @@ namespace ComfyEconomy {
         public ComfyEconomy(Main game) : base(game) {
         }
         public override string Name => "ComfyEconomy";
-        public override Version Version => new Version(1, 2, 3);
+        public override Version Version => new Version(1, 3, 0);
         public override string Author => "Soofa";
-        public override string Description => "Simple economy plugin.";
+        public override string Description => "Economy plugin with shop signs and mines.";
 
         private DateTime mineSavedTime = DateTime.UtcNow;
         public static List<Mine> mines = new();
@@ -30,10 +25,6 @@ namespace ComfyEconomy {
         public static string configPath = Path.Combine(TShock.SavePath + "/ComfyEconomyConfig.json");
         public static Config Config = new Config();
         public override void Initialize() {
-            /*
-            db = new SqliteConnection(("Data Source=" + Path.Combine(TShock.SavePath, "ComfyEconomy.sqlite")));
-            dbManager = new DbManager(db);
-            */
             ServerApi.Hooks.NetGreetPlayer.Register(this, OnNetGreetPlayer);
             ServerApi.Hooks.GameUpdate.Register(this, OnGameUpdate);
             GetDataHandlers.Sign += OnSignChange;
@@ -97,7 +88,7 @@ namespace ComfyEconomy {
             string newText = args.Data.ReadString();
 
 
-            if (newText.StartsWith("-Buy-") || newText.StartsWith("-S-Buy-") || newText.StartsWith("-S-Sell-")) {
+            if (newText.StartsWith("-Buy-") || newText.StartsWith("-S-Buy-") || newText.StartsWith("-S-Sell-") || newText.StartsWith("-S-Command-")) {
                 newText = ShopSign.StandardizeText(newText, args.Player);
                 Main.sign[signId].text = newText;
                 TSPlayer.All.SendData(PacketTypes.SignNew, newText, signId, posX, posY);
@@ -115,8 +106,10 @@ namespace ComfyEconomy {
                 return;
             }
 
-            if (Main.sign[signID].text.StartsWith("-Buy-") && !Main.sign[signID].text.EndsWith(args.Player.Name)) {
-                ShopSign sign = ShopSign.GetShopSign(Main.sign[signID].text);
+            string text = Main.sign[signID].text;
+
+            if (text.StartsWith("-Buy-") && !text.EndsWith(args.Player.Name) /*!Main.sign[signID].text.EndsWith(args.Player.Name)*/) {
+                ShopSign.ItemSign sign = ShopSign.GetItemSign(text);
                 int chestID = ShopSign.GetChestIdByPos(posX, posY + 2);
                 if (chestID == -1) {
                     SendFloatingMsg(args.Player, "This sign is not connected to a chest!", 255, 50, 50);
@@ -124,24 +117,18 @@ namespace ComfyEconomy {
                 else {
                     sign.Buy(args.Player, chestID);
                 }
-            }/*
-            else if (Main.sign[signID].text.StartsWith("-Sell-") && !Main.sign[signID].text.EndsWith(args.Player.Name)) {
-                ShopSign sign = ShopSign.GetShopSign(Main.sign[signID].text);
-                int chestID = ShopSign.GetChestIdByPos(posX, posY + 2);
-                if (chestID == -1) {
-                    SendFloatingMsg(args.Player, "This sign is not connected to a chest!", 255, 50, 50);
-                }
-                else {
-                    // sell
-                }
-            }*/
-            else if (Main.sign[signID].text.StartsWith("-S-Buy-")) {
-                ShopSign sign = ShopSign.GetShopSign(Main.sign[signID].text);
+            }
+            else if (text.StartsWith("-S-Buy-")) {
+                ShopSign.ItemSign sign = ShopSign.GetItemSign(text);
                 sign.ServerBuy(args.Player);
             }
-            else if (Main.sign[signID].text.StartsWith("-S-Sell-")) {
-                ShopSign sign = ShopSign.GetShopSign(Main.sign[signID].text);
+            else if (text.StartsWith("-S-Sell-")) {
+                ShopSign.ItemSign sign = ShopSign.GetItemSign(text);
                 sign.ServerSell(args.Player);
+            }
+            else if (text.StartsWith("-S-Command-")) {
+                ShopSign.CommandSign sign = ShopSign.GetCommandSign(text);
+                sign.ExecuteCommand(args.Player);
             }
             else {
                 return;

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TShockAPI;
+﻿using TShockAPI;
 using ComfyEconomy.Database;
-using System.Net.Mail;
+using Terraria;
 
 namespace ComfyEconomy {
     public class Commands {
@@ -33,6 +28,54 @@ namespace ComfyEconomy {
                 HelpText = "Create a new mine. Usage: /addmine x1 y1 x2 y2 tileId paintId",
                 DoLog = true
             });
+
+            TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.updateeco", Commands.UpdateEcoCmd, "updateeco") {
+                AllowServer = true,
+                HelpText = "This command will do some updates related to ComfyEconomy.\nDO NOT USE THIS COMMAND IF YOU'RE NOT UPDATING FROM AN EARLIER VERSION OF COMFYECONOMY.",
+                DoLog = true
+            });
+        }
+
+        private static void UpdateEcoCmd(CommandArgs args) {
+            for (int i = 0; i < Sign.maxSigns; i++) {
+                Sign sign = Main.sign[i];
+
+                if (sign == null || sign.text == null) {
+                    continue;
+                }
+
+                if (sign.text.StartsWith("-S-Command-")) {
+                    sign.text = "-Error-\nYou don't have permission to use this shop sign tag.";
+                    TSPlayer.All.SendData(PacketTypes.SignNew, "", i);
+                }
+                else if (sign.text.StartsWith("-Buy-")) {
+                    string[] lines = sign.text.Split('\n');
+
+                    List<Item> item = TShock.Utils.GetItemByName(lines[1][6..]);
+
+                    lines[1] = $"Name: {lines[1][6..]} #{item[0].netID}";
+                    sign.text = string.Join('\n', lines);
+                    TSPlayer.All.SendData(PacketTypes.SignNew, "", i);
+                }
+                else if (sign.text.StartsWith("-S-Buy-")) {
+                    string[] lines = sign.text.Split('\n');
+
+                    List<Item> item = TShock.Utils.GetItemByName(lines[1][6..]);
+
+                    lines[1] = $"Name: {lines[1][6..]} #{item[0].netID}";
+                    sign.text = string.Join('\n', lines);
+                    TSPlayer.All.SendData(PacketTypes.SignNew, "", i);
+                }
+                else if (sign.text.StartsWith("-S-Sell-")) {
+                    string[] lines = sign.text.Split('\n');
+
+                    List<Item> item = TShock.Utils.GetItemByName(lines[1][6..]);
+
+                    lines[1] = $"Name: {lines[1][6..]} #{item[0].netID}";
+                    sign.text = string.Join('\n', lines);
+                    TSPlayer.All.SendData(PacketTypes.SignNew, "", i);
+                }
+            }
         }
 
         private static void BalanceAdminCmd(CommandArgs args) {

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33403.182
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComfyEconomy", "ComfyEconomy\ComfyEconomy.csproj", "{3D561703-CC33-4EA6-8A38-A2F5B8EDF0AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ComfyEconomy", "ComfyEconomy\ComfyEconomy.csproj", "{3D561703-CC33-4EA6-8A38-A2F5B8EDF0AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
