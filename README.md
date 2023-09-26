@@ -14,29 +14,31 @@ A TShock economy plugin.
 |---------------------|-------------------------------------------------------------------|
 | comfyeco.serversign | To be able to place server signs (-S-Buy-, -S-Sell-, -S-Command-) |
 
-## Shop Sign Syntax
-* For Item Signs (-Buy-, -S-Buy-, -S-Sell-):
-```
-Tag
-Item Name or ID
-Amount
-Price
-```
-or
-```
-Tag; Item Name or ID; Amount; Price
-```
-* For Command Signs (-S-Command-):
-```
-Tag
-Command
-Description
-Price
-```
-or
-```
-Tag; Command; Description; Price
-```
 **Note**: _If you're updating to v.1.3.0 from an earlier version, you can update shop sign formatting with ``/updateeco``._ <br>
           _Using this command multiple times will break the shop signs._ <br>
           _If you're not updating from an earlier version you don't need to use this command. If you do it'll break the shop signs._
+
+## Shop Sign Syntax
+```
+Tag
+Item Name or ID / Command
+Amount / Description
+Price
+```
+or
+```
+Tag; Item Name or ID / Command; Amount / Description; Price
+```
+### Examples
+* Default (-Buy-)
+<img src="https://github.com/Soof4/ComfyEconomy/blob/main/Shop%20Sign%20Syntax%20Examples/default0.png?raw=true" alt="alt text" height="160px">
+<img src="https://github.com/Soof4/ComfyEconomy/blob/main/Shop%20Sign%20Syntax%20Examples/default1.png?raw=true" alt="alt text" height="160px">
+
+* Server (-S-Buy-, -S-Sell-)
+<img src="https://github.com/Soof4/ComfyEconomy/blob/main/Shop%20Sign%20Syntax%20Examples/server0.png?raw=true" alt="alt text" height="160px">
+<img src="https://github.com/Soof4/ComfyEconomy/blob/main/Shop%20Sign%20Syntax%20Examples/server1.png?raw=true" alt="alt text" height="160px">
+
+* Command (-S-Command-)
+<img src="https://github.com/Soof4/ComfyEconomy/blob/main/Shop%20Sign%20Syntax%20Examples/command0.png?raw=true" alt="alt text" height="160px">
+<img src="https://github.com/Soof4/ComfyEconomy/blob/main/Shop%20Sign%20Syntax%20Examples/command1.png?raw=true" alt="alt text" height="160px">
+
