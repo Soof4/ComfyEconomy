@@ -44,17 +44,18 @@ namespace ComfyEconomy {
                     continue;
                 }
 
-                if (sign.text.StartsWith("-S-Command-")) {
-                    sign.text = "-Error-\nYou don't have permission to use this shop sign tag.";
-                    TSPlayer.All.SendData(PacketTypes.SignNew, "", i);
-                }
-                else if (sign.text.StartsWith("-Buy-")) {
+                if (sign.text.StartsWith("-Buy-")) {
                     string[] lines = sign.text.Split('\n');
 
                     List<Item> item = TShock.Utils.GetItemByName(lines[1][6..]);
 
-                    lines[1] = $"Name: {lines[1][6..]} #{item[0].netID}";
+                    if (!lines[1].Contains('#')) {
+                        lines[1] = $"Name: {lines[1][6..]} #{item[0].netID}";
+                    }
+                    
+                    lines[3] = $"Price: {lines[3][5..]}";
                     sign.text = string.Join('\n', lines);
+
                     TSPlayer.All.SendData(PacketTypes.SignNew, "", i);
                 }
                 else if (sign.text.StartsWith("-S-Buy-")) {
@@ -62,8 +63,13 @@ namespace ComfyEconomy {
 
                     List<Item> item = TShock.Utils.GetItemByName(lines[1][6..]);
 
-                    lines[1] = $"Name: {lines[1][6..]} #{item[0].netID}";
+                    if (!lines[1].Contains('#')) {
+                        lines[1] = $"Name: {lines[1][6..]} #{item[0].netID}";
+                    }
+
+                    lines[3] = $"Price: {lines[3][5..]}";
                     sign.text = string.Join('\n', lines);
+
                     TSPlayer.All.SendData(PacketTypes.SignNew, "", i);
                 }
                 else if (sign.text.StartsWith("-S-Sell-")) {
@@ -71,8 +77,13 @@ namespace ComfyEconomy {
 
                     List<Item> item = TShock.Utils.GetItemByName(lines[1][6..]);
 
-                    lines[1] = $"Name: {lines[1][6..]} #{item[0].netID}";
+                    if (!lines[1].Contains('#')) {
+                        lines[1] = $"Name: {lines[1][6..]} #{item[0].netID}";
+                    }
+
+                    lines[3] = $"Price: {lines[3][5..]}";
                     sign.text = string.Join('\n', lines);
+
                     TSPlayer.All.SendData(PacketTypes.SignNew, "", i);
                 }
             }
