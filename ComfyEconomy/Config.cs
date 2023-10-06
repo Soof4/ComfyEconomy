@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace ComfyEconomy {
     public class Config {
         public int MineRefillIntervalInMins = 60;
-        public int ShopSignControlIntervalInMins = 5;
+        public int MinePostponeMins = 5;
         public void Write() {
             File.WriteAllText(ComfyEconomy.configPath, JsonConvert.SerializeObject(this, Formatting.Indented));
         }
