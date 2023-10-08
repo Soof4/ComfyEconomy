@@ -14,7 +14,7 @@ namespace ComfyEconomy {
         public ComfyEconomy(Main game) : base(game) {
         }
         public override string Name => "ComfyEconomy";
-        public override Version Version => new Version(1, 3, 2);
+        public override Version Version => new Version(1, 3, 3);
         public override string Author => "Soofa";
         public override string Description => "Economy plugin with shop signs and mines.";
 
@@ -51,7 +51,7 @@ namespace ComfyEconomy {
             else {
                 Config.Write();
             }
-            e.Player.SendSuccessMessage("PlaytimeRewards plugin has been reloaded.");
+            e.Player.SendSuccessMessage("ComfyEconomy has been reloaded.");
         }
 
         private void OnGameUpdate(EventArgs args) {
@@ -88,7 +88,7 @@ namespace ComfyEconomy {
                         TSPlayer.All.SendMessage("[i:3509]  Mines have been refilled.", 153, 255, 204);
                     }
                     else {
-                        TSPlayer.All.SendMessage("[i:3509]  Coudln't refill, mines were already full.", 255, 68, 119);
+                        TSPlayer.All.SendMessage("[i:3509]  Couldn't refill, mines were already full.", 255, 68, 119);
                     }
                 }
 
