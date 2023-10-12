@@ -14,7 +14,7 @@ namespace ComfyEconomy {
         public ComfyEconomy(Main game) : base(game) {
         }
         public override string Name => "ComfyEconomy";
-        public override Version Version => new Version(1, 3, 3);
+        public override Version Version => new Version(1, 4, 0);
         public override string Author => "Soofa";
         public override string Description => "Economy plugin with shop signs and mines.";
 
@@ -119,7 +119,7 @@ namespace ComfyEconomy {
             string newText = args.Data.ReadString();
 
 
-            if (newText.StartsWith("-Buy-") || newText.StartsWith("-S-Buy-") || newText.StartsWith("-S-Sell-") || newText.StartsWith("-S-Command-")) {
+            if (newText.StartsWith("-Buy-") || newText.StartsWith("-S-Buy-") || newText.StartsWith("-S-Sell-") || newText.StartsWith("-S-Command-") || newText.StartsWith("-S-Trade-")) {
                 newText = ShopSign.StandardizeText(newText, args.Player);
                 Main.sign[signId].text = newText;
                 TSPlayer.All.SendData(PacketTypes.SignNew, newText, signId, posX, posY);
@@ -139,7 +139,7 @@ namespace ComfyEconomy {
 
             string text = Main.sign[signID].text;
 
-            if (text.StartsWith("-Buy-") && !text.EndsWith(args.Player.Name) /*!Main.sign[signID].text.EndsWith(args.Player.Name)*/) {
+            if (text.StartsWith("-Buy-") && !text.EndsWith(args.Player.Name)) {
                 ShopSign.ItemSign sign = ShopSign.GetItemSign(text);
                 int chestID = ShopSign.GetChestIdByPos(posX, posY + 2);
                 if (chestID == -1) {
@@ -160,6 +160,10 @@ namespace ComfyEconomy {
             else if (text.StartsWith("-S-Command-")) {
                 ShopSign.CommandSign sign = ShopSign.GetCommandSign(text);
                 sign.ExecuteCommand(args.Player);
+            }
+            else if (text.StartsWith("-S-Trade-")) {
+                ShopSign.TradeSign sign = ShopSign.GetTradeSign(text);
+                sign.Trade(args.Player);
             }
             else {
                 return;

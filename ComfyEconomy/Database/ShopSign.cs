@@ -1,4 +1,5 @@
-﻿using Terraria;
+﻿using NuGet.Protocol.Plugins;
+using Terraria;
 using Terraria.Localization;
 using TShockAPI;
 
@@ -111,6 +112,40 @@ namespace ComfyEconomy.Database {
             }
         }
         
+        public class TradeSign {
+            public int ItemID;
+            public int Amount;
+            public int ReqItemID;
+            public int ReqAmount;
+
+            public TradeSign(int itemID, int amount, int reqItemID, int reqAmount) {
+                ItemID = itemID;
+                Amount = amount;
+                ReqItemID = reqItemID;
+                ReqAmount = reqAmount;
+            }
+
+            public void Trade(TSPlayer buyer) {
+                if (buyer.SelectedItem.netID != ReqItemID) {
+                    ComfyEconomy.SendFloatingMsg(buyer, "Item doesn't match!", 255, 50, 50);
+                    return;
+                }
+                if (buyer.SelectedItem.stack < ReqAmount) {
+                    ComfyEconomy.SendFloatingMsg(buyer, "You don't have enough!", 255, 50, 50);
+                    return;
+                }
+
+                buyer.SelectedItem.stack -= ReqAmount;
+                NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, NetworkText.FromLiteral(buyer.SelectedItem.Name), buyer.Index, buyer.TPlayer.selectedItem);
+                NetMessage.SendData((int)PacketTypes.PlayerSlot, buyer.Index, -1, NetworkText.FromLiteral(buyer.SelectedItem.Name), buyer.Index, buyer.TPlayer.selectedItem);
+                buyer.GiveItem(ItemID, Amount);
+
+                ComfyEconomy.SendFloatingMsg(buyer, $"Bought {Amount} {TShock.Utils.GetItemById(ItemID).Name}", 50, 255, 50);
+                
+                return;
+            }
+        }
+
         private static void DeleteItemsFromChest(int chestID, int itemID, int amount) {
             for (int i= 0; i<40; i++) {
                 Item item = Main.chest[chestID].item[i];
@@ -229,6 +264,28 @@ namespace ComfyEconomy.Database {
                             $"Description: {signContent[2]}\n" +
                             $"Price: {price}";
                 }
+                case "-S-Trade-": {
+                    List<Item> itemList, reqItemList;
+                    int amount, reqAmount;
+
+                    itemList = TShock.Utils.GetItemByIdOrName(signContent[1]);
+                    reqItemList = TShock.Utils.GetItemByIdOrName(signContent[3]);
+
+                    if (itemList.Count < 1 || reqItemList.Count < 1) {
+                        return "-Error-\nItem could not be found. Typo?";
+                    }
+
+                    if (!int.TryParse(signContent[2], out amount) || itemList[0].maxStack < amount || amount < 0 ||
+                        !int.TryParse(signContent[4], out reqAmount) || reqItemList[0].maxStack < reqAmount || reqAmount < 0) {
+                        return "-Error-\nAmount cannot exceed max stack amount of the item or can't be lower than 0.";
+                    }
+
+                    return $"-S-Trade-\n" +
+                            $"Name: {itemList[0].Name} #{itemList[0].netID}\n" +
+                            $"Amount: {amount}\n" +
+                            $"Requirement: {reqItemList[0].Name} #{reqItemList[0].netID}\n" +
+                            $"Requirement Amount: {reqAmount}";
+                }
                 default: return "-Error-\nUnknown.";
             }
         }
@@ -260,6 +317,17 @@ namespace ComfyEconomy.Database {
                    int.Parse(lines[3][7..])                               // read the price
                    );
 
+        }
+
+        public static TradeSign GetTradeSign(string text) {
+            string[] lines = text.Split("\n");
+
+            return new TradeSign(
+                   int.Parse(lines[1][(lines[1].LastIndexOf('#') + 1)..]),
+                   int.Parse(lines[2][8..]),
+                   int.Parse(lines[3][(lines[3].LastIndexOf('#') + 1)..]),
+                   int.Parse(lines[4][20..])
+                   );
         }
         public static int GetSignIdByPos(int x, int y) {
             for (int i = 0; i < 1000; i++) {
