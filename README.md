@@ -19,16 +19,35 @@ A TShock economy plugin.
           _If you're not updating from an earlier version you don't need to use this command. If you do it'll break the shop signs._
 
 ## Shop Sign Syntax
+### Item Signs (-Buy-, -S-Buy-, -S-Sell-)
 ```
 Tag
-Item Name or ID / Command
-Amount / Description
+Item Name or ID
+Amount
 Price
 ```
-or
+### Command Sign (-S-Command-)
 ```
-Tag; Item Name or ID / Command; Amount / Description; Price
+Tag
+Command
+Description
+Price
 ```
+### Trade Sign (-S-Trade-)
+```
+Tag
+Item Name or ID
+Amount
+Required Item Name or ID
+Required Amount
+```
+**Note**: _``Tag`` refers to sign's type such as -Buy-, -S-Command-, etc._
+**Note**: _Since mobile players can't type in new line character, they would need to use this kind of syntax instead:_
+```
+Tag; Item Name or ID; Amount; Price
+```
+
+
 ### Examples
 * Default (-Buy-)
 <img src="https://github.com/Soof4/ComfyEconomy/blob/main/Shop%20Sign%20Syntax%20Examples/default0.png?raw=true" alt="alt text" height="160px">
