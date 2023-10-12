@@ -41,7 +41,7 @@ Amount
 Required Item Name or ID
 Required Amount
 ```
-**Note**: _``Tag`` refers to sign's type such as -Buy-, -S-Command-, etc._
+**Note**: _``Tag`` refers to sign's type such as -Buy-, -S-Command-, etc._ <br>
 **Note**: _Since mobile players can't type in new line character, they would need to use this kind of syntax instead:_
 ```
 Tag; Item Name or ID; Amount; Price
