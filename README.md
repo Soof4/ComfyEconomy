@@ -12,7 +12,7 @@ A TShock economy plugin.
 
 | Permissions         | Function                                                          |
 |---------------------|-------------------------------------------------------------------|
-| comfyeco.serversign | To be able to place server signs (-S-Buy-, -S-Sell-, -S-Command-) |
+| comfyeco.serversign | To be able to place server signs (-S-Buy-, -S-Sell-, -S-Command-, -S-Trade-) |
 
 **Note**: _If you're updating to v.1.3.0 from an earlier version, you can update shop sign formatting with ``/updateeco``._ <br>
           _Using this command multiple times will break the shop signs._ <br>
