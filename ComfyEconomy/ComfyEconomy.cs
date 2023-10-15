@@ -14,7 +14,7 @@ namespace ComfyEconomy {
         public ComfyEconomy(Main game) : base(game) {
         }
         public override string Name => "ComfyEconomy";
-        public override Version Version => new Version(1, 4, 0);
+        public override Version Version => new Version(1, 4, 1);
         public override string Author => "Soofa";
         public override string Description => "Economy plugin with shop signs and mines.";
 
@@ -25,7 +25,6 @@ namespace ComfyEconomy {
         public static string configPath = Path.Combine(TShock.SavePath + "/ComfyEconomyConfig.json");
         public static Config Config = new Config();
         public static bool forceNextMineRefill = false;
-
         public override void Initialize() {
             ServerApi.Hooks.NetGreetPlayer.Register(this, OnNetGreetPlayer);
             ServerApi.Hooks.GameUpdate.Register(this, OnGameUpdate);

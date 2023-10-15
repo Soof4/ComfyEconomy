@@ -85,15 +85,27 @@ namespace ComfyEconomy.Database {
                     return;
                 }
 
+                foreach (Item item in Main.item) {
+                    if (item != null && item.stack == seller.SelectedItem.stack &&
+                        item.netID == ItemID && item.prefix == seller.SelectedItem.prefix) {
+                        ComfyEconomy.SendFloatingMsg(seller, "You dropped the item!", 255, 50, 50);
+                        return;
+                    }
+                }
+
                 Account sellerAccount = ComfyEconomy.dbManager.GetAccount(seller.Name);
 
                 seller.SelectedItem.stack -= Amount;
+
                 NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, NetworkText.FromLiteral(seller.SelectedItem.Name), seller.Index, seller.TPlayer.selectedItem);
                 NetMessage.SendData((int)PacketTypes.PlayerSlot, seller.Index, -1, NetworkText.FromLiteral(seller.SelectedItem.Name), seller.Index, seller.TPlayer.selectedItem);
 
                 ComfyEconomy.dbManager.SaveAccount(seller.Name, sellerAccount.Balance + Price);
 
                 ComfyEconomy.SendFloatingMsg(seller, $"Sold {Amount} {TShock.Utils.GetItemById(ItemID).Name}", 50, 255, 50);
+
+                
+
                 return;
             }
         }
@@ -133,6 +145,14 @@ namespace ComfyEconomy.Database {
                 if (buyer.SelectedItem.stack < ReqAmount) {
                     ComfyEconomy.SendFloatingMsg(buyer, "You don't have enough!", 255, 50, 50);
                     return;
+                }
+
+                foreach (Item item in Main.item) {
+                    if (item != null && item.stack == buyer.SelectedItem.stack &&
+                        item.netID == ReqItemID && item.prefix == buyer.SelectedItem.prefix) {
+                        ComfyEconomy.SendFloatingMsg(buyer, "You dropped the item!", 255, 50, 50);
+                        return;
+                    }
                 }
 
                 buyer.SelectedItem.stack -= ReqAmount;
