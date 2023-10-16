@@ -1,4 +1,5 @@
 ﻿using NuGet.Protocol.Plugins;
+using System;
 using Terraria;
 using Terraria.Localization;
 using TShockAPI;
@@ -55,8 +56,6 @@ namespace ComfyEconomy.Database {
                 ComfyEconomy.dbManager.SaveAccount(sellerAccount.AccountName, sellerAccount.Balance + Price);
 
                 ComfyEconomy.SendFloatingMsg(buyer, $"Bought {Amount} {TShock.Utils.GetItemById(ItemID).Name}", 50, 255, 50);
-
-                return;
             }
 
             public void ServerBuy(TSPlayer buyer) {
@@ -71,8 +70,6 @@ namespace ComfyEconomy.Database {
                 buyer.GiveItem(ItemID, Amount);
 
                 ComfyEconomy.SendFloatingMsg(buyer, $"Bought {Amount} {TShock.Utils.GetItemById(ItemID).Name}", 50, 255, 50);
-
-                return;
             }
 
             public void ServerSell(TSPlayer seller) {
@@ -87,7 +84,8 @@ namespace ComfyEconomy.Database {
 
                 foreach (Item item in Main.item) {
                     if (item != null && item.stack == seller.SelectedItem.stack &&
-                        item.netID == ItemID && item.prefix == seller.SelectedItem.prefix) {
+                        item.netID == ItemID && item.prefix == seller.SelectedItem.prefix &&
+                        item.position.WithinRange(seller.TPlayer.position, 16 * 40)) {
                         ComfyEconomy.SendFloatingMsg(seller, "You dropped the item!", 255, 50, 50);
                         return;
                     }
@@ -120,7 +118,17 @@ namespace ComfyEconomy.Database {
             }
 
             public void ExecuteCommand(TSPlayer buyer) {
+                Account buyerAccount = ComfyEconomy.dbManager.GetAccount(buyer.Name);
+
+                if (buyerAccount.Balance < Price) {
+                    ComfyEconomy.SendFloatingMsg(buyer, "You don't have enough money!", 255, 50, 50);
+                    return;
+                }
+
+                ComfyEconomy.dbManager.SaveAccount(buyer.Name, buyerAccount.Balance - Price);
                 TShockAPI.Commands.HandleCommand(TSPlayer.Server, Command);
+
+                ComfyEconomy.SendFloatingMsg(buyer, $"Executed {Command}", 50, 255, 50);
             }
         }
         
@@ -149,7 +157,8 @@ namespace ComfyEconomy.Database {
 
                 foreach (Item item in Main.item) {
                     if (item != null && item.stack == buyer.SelectedItem.stack &&
-                        item.netID == ReqItemID && item.prefix == buyer.SelectedItem.prefix) {
+                        item.netID == ReqItemID && item.prefix == buyer.SelectedItem.prefix && 
+                        item.position.WithinRange(buyer.TPlayer.position, 16 * 40)) {
                         ComfyEconomy.SendFloatingMsg(buyer, "You dropped the item!", 255, 50, 50);
                         return;
                     }
