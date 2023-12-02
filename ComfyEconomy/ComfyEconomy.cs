@@ -14,7 +14,7 @@ namespace ComfyEconomy {
         public ComfyEconomy(Main game) : base(game) {
         }
         public override string Name => "ComfyEconomy";
-        public override Version Version => new Version(1, 4, 2);
+        public override Version Version => new Version(1, 4, 3);
         public override string Author => "Soofa";
         public override string Description => "Economy plugin with shop signs and mines.";
 
@@ -77,7 +77,7 @@ namespace ComfyEconomy {
                 }
 
                 foreach (var mine in mines) {
-                    if (RefillMine(mine.MineID)) {
+                    if (Mine.RefillMine(mine.MineID)) {
                         minesRefilled = true;
                     }
                 }
@@ -117,6 +117,10 @@ namespace ComfyEconomy {
             int posY = args.Data.ReadInt16();
             string newText = args.Data.ReadString();
 
+            IEnumerable<TShockAPI.DB.Region> region = TShock.Regions.InAreaRegion(posX, posY); 
+            if (region.Any() && !region.First().Owner.Equals(args.Player.Name)) {
+                return;
+            }
 
             if (newText.StartsWith("-Buy-") || newText.StartsWith("-S-Buy-") || newText.StartsWith("-S-Sell-") || newText.StartsWith("-S-Command-") || newText.StartsWith("-S-Trade-")) {
                 newText = ShopSign.StandardizeText(newText, args.Player);
@@ -170,29 +174,6 @@ namespace ComfyEconomy {
 
             args.Player.TPlayer.CloseSign();
             args.Handled = true;
-        }
-
-        public static bool RefillMine(int mineId) {
-            bool isRefilled = false;
-            Mine mine = ComfyEconomy.dbManager.GetMine(mineId);
-            mine.PosX2++;
-            mine.PosY2++;
-
-            for (int i = mine.PosX1; i < mine.PosX2; i++) {
-                for (int j = mine.PosY1; j < mine.PosY2; j++) {
-                    if (Main.tile[i, j].type != mine.TileID || Main.tile[i, j].color() != mine.PaintID) {
-                        WorldGen.PlaceTile(i, j, mine.TileID, forced: true);
-                        WorldGen.paintTile(i, j, (byte)mine.PaintID);
-                        isRefilled = true;
-                    }
-                }
-            }
-            
-            if (isRefilled) {
-                TSPlayer.All.SendTileRect((short)mine.PosX1, (short)mine.PosY1, (byte)(mine.PosX2 - mine.PosX1 + 1), (byte)(mine.PosY2 - mine.PosY1 + 1));
-            }
-
-            return isRefilled;
         }
 
         public static void SendFloatingMsg(TSPlayer plr, string msg, byte r, byte g, byte b) {

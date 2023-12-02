@@ -1,38 +1,45 @@
 ﻿using TShockAPI;
 using ComfyEconomy.Database;
 using Terraria;
+using System.Runtime.Intrinsics.X86;
 
 namespace ComfyEconomy {
     public class Commands {
     
         public static void AddCommands() {
-            TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.bal.check", Commands.BalanceCmd, "bal", "balance") {
+            TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.bal.check", BalanceCmd, "bal", "balance") {
                 AllowServer = true,
                 HelpText = "Check balance."
             });
 
-            TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.bal.admin", Commands.BalanceAdminCmd, "baladmin", "balanceadmin") {
+            TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.bal.admin", BalanceAdminCmd, "baladmin", "balanceadmin") {
                 AllowServer = true,
                 HelpText = "Do balance manipulation.",
                 DoLog = true
             });
 
-            TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.pay", Commands.PayCmd, "pay") {
+            TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.pay", PayCmd, "pay") {
                 AllowServer = false,
                 HelpText = "Pay someone money. Usage: /pay [name] [amount]",
                 DoLog = true
             });
 
-            TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.addmine", Commands.AddMineCmd, "addmine") {
+            TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.addmine", AddMineCmd, "addmine") {
                 AllowServer = false,
                 HelpText = "Create a new mine. Usage: /addmine x1 y1 x2 y2 tileId paintId",
                 DoLog = true
             });
 
-            TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.updateeco", Commands.UpdateEcoCmd, "updateeco") {
+            TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.updateeco", UpdateEcoCmd, "updateeco") {
                 AllowServer = true,
                 HelpText = "This command will do some updates related to ComfyEconomy.\nDO NOT USE THIS COMMAND IF YOU'RE NOT UPDATING FROM AN EARLIER VERSION OF COMFYECONOMY.",
                 DoLog = true
+            });
+
+            TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.toprich", TopRichCmd, "toprich") {
+                AllowServer = true,
+                HelpText = "Shows the top 5 wealthiest players.",
+                DoLog = false
             });
         }
 
@@ -229,7 +236,32 @@ namespace ComfyEconomy {
             ComfyEconomy.mines = ComfyEconomy.dbManager.GetAllMines();
 
             args.Player.SendSuccessMessage("New mine has been added.");
-            ComfyEconomy.RefillMine(ComfyEconomy.dbManager.GetMineIdFromX1Y1(x1, y1));
+            Mine.RefillMine(ComfyEconomy.dbManager.GetMineIdFromX1Y1(x1, y1));
+        }
+    
+        public static async void TopRichCmd(CommandArgs args) {
+            string message = "";
+
+            await Task.Run(() => {
+                List<Account> accounts = ComfyEconomy.dbManager.GetAllAccounts();
+                accounts.Sort((a1, a2) => a2.Balance - a1.Balance);
+
+                Account a;
+
+                if (accounts.TryGetValue(0, out a)) {
+                        message += $"{1}. {a.AccountName} : {a.Balance}";
+                }
+
+                for (int i = 1; i < 5; i++) {
+                    if (accounts.TryGetValue(i, out a)) {
+                        message += $"\n{i + 1}. {a.AccountName} : {a.Balance}";
+                    }
+                }
+
+                
+            });
+
+            args.Player.SendInfoMessage(message);
         }
     }
 }

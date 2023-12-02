@@ -1,4 +1,6 @@
-﻿
+﻿using Terraria;
+using TShockAPI;
+
 namespace ComfyEconomy.Database {
     public class Mine {
 
@@ -17,6 +19,29 @@ namespace ComfyEconomy.Database {
             PosY2 = posY2;
             TileID = tileId;
             PaintID = paintID;
+        }
+
+        public static bool RefillMine(int mineId) {
+            bool isRefilled = false;
+            Mine mine = ComfyEconomy.dbManager.GetMine(mineId);
+            mine.PosX2++;
+            mine.PosY2++;
+
+            for (int i = mine.PosX1; i < mine.PosX2; i++) {
+                for (int j = mine.PosY1; j < mine.PosY2; j++) {
+                    if (Main.tile[i, j].type != mine.TileID || Main.tile[i, j].color() != mine.PaintID) {
+                        WorldGen.PlaceTile(i, j, mine.TileID, forced: true);
+                        WorldGen.paintTile(i, j, (byte)mine.PaintID);
+                        isRefilled = true;
+                    }
+                }
+            }
+            
+            if (isRefilled) {
+                TSPlayer.All.SendTileRect((short)mine.PosX1, (short)mine.PosY1, (byte)(mine.PosX2 - mine.PosX1 + 1), (byte)(mine.PosY2 - mine.PosY1 + 1));
+            }
+
+            return isRefilled;
         }
     }
 }

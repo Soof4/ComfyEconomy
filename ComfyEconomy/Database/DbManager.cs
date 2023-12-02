@@ -54,6 +54,18 @@ namespace ComfyEconomy.Database {
                 balance, accountName) != 0;
         }
 
+        public List<Account> GetAllAccounts() {
+            List<Account> accounts = new List<Account>();
+            using var reader = _db.QueryReader("SELECT * FROM Accounts");
+            while (reader.Read()) {
+                accounts.Add(new Account(
+                    reader.Get<string>("AccountName"),
+                    reader.Get<int>("Balance")
+                ));
+            }
+
+            return accounts;
+        }
 
         // MINE METHODS
         /// <exception cref="NullReferenceException"></exception>

@@ -1,0 +1,74 @@
+{
+  "format": 1,
+  "restore": {
+    "/home/soofa/GitProjects/ComfyEconomy/ComfyEconomy/ComfyEconomy.csproj": {}
+  },
+  "projects": {
+    "/home/soofa/GitProjects/ComfyEconomy/ComfyEconomy/ComfyEconomy.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/soofa/GitProjects/ComfyEconomy/ComfyEconomy/ComfyEconomy.csproj",
+        "projectName": "ComfyEconomy",
+        "projectPath": "/home/soofa/GitProjects/ComfyEconomy/ComfyEconomy/ComfyEconomy.csproj",
+        "packagesPath": "/home/soofa/.nuget/packages/",
+        "outputPath": "/home/soofa/GitProjects/ComfyEconomy/ComfyEconomy/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/soofa/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "OTAPI.Upcoming": {
+              "target": "Package",
+              "version": "[3.1.20, )"
+            },
+            "TSAPI": {
+              "target": "Package",
+              "version": "[5.2.0, )"
+            },
+            "TShock": {
+              "target": "Package",
+              "version": "[5.2.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/6.0.125/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
