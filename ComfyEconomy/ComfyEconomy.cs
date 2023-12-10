@@ -14,7 +14,7 @@ namespace ComfyEconomy {
         public ComfyEconomy(Main game) : base(game) {
         }
         public override string Name => "ComfyEconomy";
-        public override Version Version => new Version(1, 4, 3);
+        public override Version Version => new Version(1, 4, 4);
         public override string Author => "Soofa";
         public override string Description => "Economy plugin with shop signs and mines.";
 
@@ -23,6 +23,7 @@ namespace ComfyEconomy {
         private static IDbConnection db = new SqliteConnection(("Data Source=" + Path.Combine(TShock.SavePath, "ComfyEconomy.sqlite")));
         public static DbManager dbManager = new DbManager(db);
         public static string configPath = Path.Combine(TShock.SavePath + "/ComfyEconomyConfig.json");
+        public static string logPath = Path.Combine(TShock.SavePath + $"/logs/ComfyEconomy");
         public static Config Config = new Config();
         public static bool forceNextMineRefill = false;
         public override void Initialize() {
@@ -34,6 +35,11 @@ namespace ComfyEconomy {
             Commands.AddCommands();
             
             mines = dbManager.GetAllMines();
+
+            if (!Directory.Exists(logPath)) {
+                Directory.CreateDirectory(logPath);
+            }
+            logPath += $"/{DateTime.Now.ToString("s")}.log";
 
             if (File.Exists(configPath)) {
                 Config = Config.Read();
@@ -127,6 +133,8 @@ namespace ComfyEconomy {
                 Main.sign[signId].text = newText;
                 TSPlayer.All.SendData(PacketTypes.SignNew, newText, signId, posX, posY);
                 args.Handled = true;
+
+                LogManager.Log("Shop-Sign-Creation", args.Player.Name, $"Created a {newText.Split("\n")[0]} tagged shop sign.");
             }
         }
 

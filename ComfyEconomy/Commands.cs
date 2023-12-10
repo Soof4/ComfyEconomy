@@ -94,6 +94,8 @@ namespace ComfyEconomy {
                     TSPlayer.All.SendData(PacketTypes.SignNew, "", i);
                 }
             }
+
+            LogManager.Log("Command", args.Player.Name, "Executed /updateeco");
         }
 
         private static void BalanceAdminCmd(CommandArgs args) {
@@ -122,14 +124,20 @@ namespace ComfyEconomy {
                 case "set":
                     ComfyEconomy.dbManager.SaveAccount(plrName, amount);
                     args.Player.SendSuccessMessage($"Successfully set {plrName}'s balance as {amount}.");
+
+                    LogManager.Log("Command", args.Player.Name, $"Executed /baladmin set {amount} {plrAccount.AccountName}");
                     return;
                 case "add":
                     ComfyEconomy.dbManager.SaveAccount(plrName, plrAccount.Balance + amount);
                     args.Player.SendSuccessMessage($"Successfully added {amount} to {plrName}'s balance.");
+
+                    LogManager.Log("Command", args.Player.Name, $"Executed /baladmin add {amount} {plrAccount.AccountName}");
                     return;
                 case "sub":
                     ComfyEconomy.dbManager.SaveAccount(plrName, plrAccount.Balance - amount);
                     args.Player.SendSuccessMessage($"Successfully subtracted {amount} from {plrName}'s balance.");
+
+                    LogManager.Log("Command", args.Player.Name, $"Executed /baladmin sub {amount} {plrAccount.AccountName}");
                     return;
                 default:
                     args.Player.SendErrorMessage("Subcommand not found.\n" +
@@ -210,11 +218,12 @@ namespace ComfyEconomy {
                 if (paidTSPlayer.Count > 0) {
                     paidTSPlayer[0].SendSuccessMessage($"{payer.AccountName} has paid you {amount}.");
                 }
+
+                LogManager.Log("Command", payer.AccountName, $"Executed /pay {paid.AccountName} {amount}");
             }
             else {
                 args.Player.SendErrorMessage("Invalid amount of money.");
             }
-
         }
 
         public static void AddMineCmd(CommandArgs args) {
@@ -237,6 +246,8 @@ namespace ComfyEconomy {
 
             args.Player.SendSuccessMessage("New mine has been added.");
             Mine.RefillMine(ComfyEconomy.dbManager.GetMineIdFromX1Y1(x1, y1));
+
+            LogManager.Log("Command", args.Player.Name, $"Executed /addmine {x1} {y1} {x2} {y2} {tId} {pId}");
         }
     
         public static async void TopRichCmd(CommandArgs args) {

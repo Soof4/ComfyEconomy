@@ -56,6 +56,8 @@ namespace ComfyEconomy.Database {
                 ComfyEconomy.dbManager.SaveAccount(sellerAccount.AccountName, sellerAccount.Balance + Price);
 
                 ComfyEconomy.SendFloatingMsg(buyer, $"Bought {Amount} {TShock.Utils.GetItemById(ItemID).Name}", 50, 255, 50);
+
+                LogManager.Log("Buy-Sign", buyerAccount.AccountName, $"Bought {Amount} {TShock.Utils.GetItemById(ItemID).Name} from {Owner}");
             }
 
             public void ServerBuy(TSPlayer buyer) {
@@ -70,6 +72,8 @@ namespace ComfyEconomy.Database {
                 buyer.GiveItem(ItemID, Amount);
 
                 ComfyEconomy.SendFloatingMsg(buyer, $"Bought {Amount} {TShock.Utils.GetItemById(ItemID).Name}", 50, 255, 50);
+
+                LogManager.Log("Server-Buy-Sign", buyerAccount.AccountName, $"Bought {Amount} {TShock.Utils.GetItemById(ItemID).Name}");
             }
 
             public void ServerSell(TSPlayer seller) {
@@ -102,9 +106,7 @@ namespace ComfyEconomy.Database {
 
                 ComfyEconomy.SendFloatingMsg(seller, $"Sold {Amount} {TShock.Utils.GetItemById(ItemID).Name}", 50, 255, 50);
 
-                
-
-                return;
+                LogManager.Log("Server-Sell-Sign", sellerAccount.AccountName, $"Sold {Amount} {TShock.Utils.GetItemById(ItemID).Name}");
             }
         }
 
@@ -129,6 +131,8 @@ namespace ComfyEconomy.Database {
                 TShockAPI.Commands.HandleCommand(TSPlayer.Server, Command);
 
                 ComfyEconomy.SendFloatingMsg(buyer, $"Executed {Command}", 50, 255, 50);
+
+                LogManager.Log("Server-Command-Sign", buyerAccount.AccountName, $"Executed {Command}");
             }
         }
         
@@ -171,7 +175,7 @@ namespace ComfyEconomy.Database {
 
                 ComfyEconomy.SendFloatingMsg(buyer, $"Bought {Amount} {TShock.Utils.GetItemById(ItemID).Name}", 50, 255, 50);
                 
-                return;
+                LogManager.Log("Server-Trade-Sign", buyer.Name, $"Traded {ReqAmount} {TShock.Utils.GetItemById(ReqItemID).Name} in for {Amount} {TShock.Utils.GetItemById(ItemID).Name}");
             }
         }
 
