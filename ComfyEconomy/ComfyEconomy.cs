@@ -14,18 +14,19 @@ namespace ComfyEconomy {
         public ComfyEconomy(Main game) : base(game) {
         }
         public override string Name => "ComfyEconomy";
-        public override Version Version => new Version(1, 4, 4);
+        public override Version Version => new Version(1, 4, 5);
         public override string Author => "Soofa";
         public override string Description => "Economy plugin with shop signs and mines.";
 
         private DateTime mineSavedTime = DateTime.UtcNow;
-        public static List<Mine> mines = new();
+        public static List<Mine> mines = new List<Mine>();
         private static IDbConnection db = new SqliteConnection(("Data Source=" + Path.Combine(TShock.SavePath, "ComfyEconomy.sqlite")));
         public static DbManager dbManager = new DbManager(db);
         public static string configPath = Path.Combine(TShock.SavePath + "/ComfyEconomyConfig.json");
-        public static string logPath = Path.Combine(TShock.SavePath + $"/logs/ComfyEconomy");
+        public static string logPath = Path.Combine(TShock.SavePath + "/logs/ComfyEconomy");
         public static Config Config = new Config();
         public static bool forceNextMineRefill = false;
+        
         public override void Initialize() {
             ServerApi.Hooks.NetGreetPlayer.Register(this, OnNetGreetPlayer);
             ServerApi.Hooks.GameUpdate.Register(this, OnGameUpdate);
@@ -61,7 +62,6 @@ namespace ComfyEconomy {
 
         private void OnGameUpdate(EventArgs args) {
             if ((DateTime.UtcNow - mineSavedTime).TotalMinutes > Config.MineRefillIntervalInMins) {
-
                 int activePlrCount = TShock.Utils.GetActivePlayerCount();
                 bool minesRefilled = false;
 
@@ -73,7 +73,8 @@ namespace ComfyEconomy {
                     foreach (var mine in mines) {
                         foreach (TSPlayer plr in TShock.Players) {
                             if (plr != null && plr.Active && !plr.Dead && plr.TileX <= mine.PosX2 && plr.TileX + 1 >= mine.PosX1 && plr.TileY + 2 >= mine.PosY1 && plr.TileY <= mine.PosY2) {
-                                TSPlayer.All.SendMessage($"[i:3509]  Couldn't refill, there were active players in mines.\n[i:15]  Refilling has been postponed for {Config.MinePostponeMins} mins.", 255, 68, 119);
+                                TSPlayer.All.SendMessage($"[i:3509]  Couldn't refill, there were active players in mines.\n" +
+                                	"[i:15]  Refilling has been postponed for {Config.MinePostponeMins} mins.", 255, 68, 119);
                                 mineSavedTime = mineSavedTime.AddMinutes(Config.MinePostponeMins);
                                 forceNextMineRefill = true;
                                 return;
@@ -198,6 +199,7 @@ namespace ComfyEconomy {
                 GetDataHandlers.SignRead -= OnSignRead;
                 GeneralHooks.ReloadEvent -= OnReload;
             }
+            
             base.Dispose(disposing);
         }
     }

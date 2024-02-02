@@ -87,7 +87,7 @@ namespace ComfyEconomy.Database {
                 }
 
                 foreach (Item item in Main.item) {
-                    if (item != null && item.stack == seller.SelectedItem.stack &&
+                    if (item != null && item.active && item.stack == seller.SelectedItem.stack &&
                         item.netID == ItemID && item.prefix == seller.SelectedItem.prefix &&
                         item.position.WithinRange(seller.TPlayer.position, 16 * 40)) {
                         ComfyEconomy.SendFloatingMsg(seller, "You dropped the item!", 255, 50, 50);
@@ -160,7 +160,7 @@ namespace ComfyEconomy.Database {
                 }
 
                 foreach (Item item in Main.item) {
-                    if (item != null && item.stack == buyer.SelectedItem.stack &&
+                    if (item != null && item.active && item.stack == buyer.SelectedItem.stack &&
                         item.netID == ReqItemID && item.prefix == buyer.SelectedItem.prefix && 
                         item.position.WithinRange(buyer.TPlayer.position, 16 * 40)) {
                         ComfyEconomy.SendFloatingMsg(buyer, "You dropped the item!", 255, 50, 50);
