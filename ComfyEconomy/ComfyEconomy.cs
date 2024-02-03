@@ -14,7 +14,7 @@ namespace ComfyEconomy {
         public ComfyEconomy(Main game) : base(game) {
         }
         public override string Name => "ComfyEconomy";
-        public override Version Version => new Version(1, 4, 5);
+        public override Version Version => new Version(1, 4, 6);
         public override string Author => "Soofa";
         public override string Description => "Economy plugin with shop signs and mines.";
 
@@ -74,7 +74,7 @@ namespace ComfyEconomy {
                         foreach (TSPlayer plr in TShock.Players) {
                             if (plr != null && plr.Active && !plr.Dead && plr.TileX <= mine.PosX2 && plr.TileX + 1 >= mine.PosX1 && plr.TileY + 2 >= mine.PosY1 && plr.TileY <= mine.PosY2) {
                                 TSPlayer.All.SendMessage($"[i:3509]  Couldn't refill, there were active players in mines.\n" +
-                                	"[i:15]  Refilling has been postponed for {Config.MinePostponeMins} mins.", 255, 68, 119);
+                                	$"[i:15]  Refilling has been postponed for {Config.MinePostponeMins} mins.", 255, 68, 119);
                                 mineSavedTime = mineSavedTime.AddMinutes(Config.MinePostponeMins);
                                 forceNextMineRefill = true;
                                 return;
