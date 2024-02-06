@@ -14,7 +14,7 @@ namespace ComfyEconomy {
         public ComfyEconomy(Main game) : base(game) {
         }
         public override string Name => "ComfyEconomy";
-        public override Version Version => new Version(1, 4, 6);
+        public override Version Version => new Version(1, 4, 7);
         public override string Author => "Soofa";
         public override string Description => "Economy plugin with shop signs and mines.";
 
@@ -186,7 +186,7 @@ namespace ComfyEconomy {
         }
 
         public static void SendFloatingMsg(TSPlayer plr, string msg, byte r, byte g, byte b) {
-            NetMessage.SendData((int)PacketTypes.CreateCombatTextExtended, -1, -1,
+            NetMessage.SendData((int)PacketTypes.CreateCombatTextExtended, plr.Index, -1,
                 Terraria.Localization.NetworkText.FromLiteral(msg), (int)new Color(r, g, b).PackedValue,
                 plr.X + 16, plr.Y + 32);
         }
