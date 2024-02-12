@@ -193,6 +193,7 @@ namespace ComfyEconomy {
                 }
                 else if (amount > payer.Balance) {
                     args.Player.SendErrorMessage($"Cannot pay {amount}. Your balance is only: {payer.Balance}.");
+                    return;
                 }
 
                 try {
