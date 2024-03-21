@@ -9,14 +9,14 @@ namespace ComfyEconomy {
         public bool EnableLogs = true;
         
         public void Write() {
-            File.WriteAllText(ComfyEconomy.configPath, JsonConvert.SerializeObject(this, Formatting.Indented));
+            File.WriteAllText(ComfyEconomy.ConfigPath, JsonConvert.SerializeObject(this, Formatting.Indented));
         }
 
         public static Config Read() {
-            if (!File.Exists(ComfyEconomy.configPath)) {
+            if (!File.Exists(ComfyEconomy.ConfigPath)) {
                 return new Config();
             }
-            return JsonConvert.DeserializeObject<Config>(File.ReadAllText(ComfyEconomy.configPath));
+            return JsonConvert.DeserializeObject<Config>(File.ReadAllText(ComfyEconomy.ConfigPath));
         }
     }
 }

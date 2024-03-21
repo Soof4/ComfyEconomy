@@ -6,7 +6,7 @@ using System.Runtime.Intrinsics.X86;
 namespace ComfyEconomy {
     public class Commands {
     
-        public static void AddCommands() {
+        public static void InitializeCommands() {
             TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.bal.check", BalanceCmd, "bal", "balance") {
                 AllowServer = true,
                 HelpText = "Check balance."
@@ -113,7 +113,7 @@ namespace ComfyEconomy {
 
             Account plrAccount;
             try {
-                plrAccount = ComfyEconomy.dbManager.GetAccount(plrName);
+                plrAccount = ComfyEconomy.DBManager.GetAccount(plrName);
             }
             catch (NullReferenceException) {
                 args.Player.SendErrorMessage($"Couldn't find the account for {plrName}.");
@@ -122,19 +122,19 @@ namespace ComfyEconomy {
 
             switch (args.Parameters[0].ToLower()) {
                 case "set":
-                    ComfyEconomy.dbManager.SaveAccount(plrName, amount);
+                    ComfyEconomy.DBManager.SaveAccount(plrName, amount);
                     args.Player.SendSuccessMessage($"Successfully set {plrName}'s balance as {amount}.");
 
                     LogManager.Log("Command", args.Player.Name, $"Executed /baladmin set {amount} {plrAccount.AccountName}");
                     return;
                 case "add":
-                    ComfyEconomy.dbManager.SaveAccount(plrName, plrAccount.Balance + amount);
+                    ComfyEconomy.DBManager.SaveAccount(plrName, plrAccount.Balance + amount);
                     args.Player.SendSuccessMessage($"Successfully added {amount} to {plrName}'s balance.");
 
                     LogManager.Log("Command", args.Player.Name, $"Executed /baladmin add {amount} {plrAccount.AccountName}");
                     return;
                 case "sub":
-                    ComfyEconomy.dbManager.SaveAccount(plrName, plrAccount.Balance - amount);
+                    ComfyEconomy.DBManager.SaveAccount(plrName, plrAccount.Balance - amount);
                     args.Player.SendSuccessMessage($"Successfully subtracted {amount} from {plrName}'s balance.");
 
                     LogManager.Log("Command", args.Player.Name, $"Executed /baladmin sub {amount} {plrAccount.AccountName}");
@@ -165,7 +165,7 @@ namespace ComfyEconomy {
             }
 
             try {
-                balance = ComfyEconomy.dbManager.GetAccount(playerName).Balance;
+                balance = ComfyEconomy.DBManager.GetAccount(playerName).Balance;
             }
             catch (NullReferenceException) {
                 args.Player.SendErrorMessage($"Couldn't find the account for {playerName}.");
@@ -179,7 +179,7 @@ namespace ComfyEconomy {
             Account payer, paid;
             int amount;
 
-            payer = ComfyEconomy.dbManager.GetAccount(args.Player.Name);
+            payer = ComfyEconomy.DBManager.GetAccount(args.Player.Name);
 
             if (args.Parameters.Count < 2) {
                 args.Player.SendErrorMessage("An argument was missing. Command usage: /pay [name] [amount]");
@@ -197,7 +197,7 @@ namespace ComfyEconomy {
                 }
 
                 try {
-                    paid = ComfyEconomy.dbManager.GetAccount(string.Join(' ', args.Parameters.GetRange(0, args.Parameters.Count - 1)));
+                    paid = ComfyEconomy.DBManager.GetAccount(string.Join(' ', args.Parameters.GetRange(0, args.Parameters.Count - 1)));
                 }
                 catch (NullReferenceException) {
                     args.Player.SendErrorMessage("Player not found.");
@@ -209,8 +209,8 @@ namespace ComfyEconomy {
                     return;
                 }
 
-                ComfyEconomy.dbManager.SaveAccount(payer.AccountName, payer.Balance - amount);
-                ComfyEconomy.dbManager.SaveAccount(paid.AccountName, paid.Balance + amount);
+                ComfyEconomy.DBManager.SaveAccount(payer.AccountName, payer.Balance - amount);
+                ComfyEconomy.DBManager.SaveAccount(paid.AccountName, paid.Balance + amount);
 
                 // Send success messages
                 args.Player.SendSuccessMessage($"You've paid {amount} to {paid.AccountName}.");
@@ -242,11 +242,11 @@ namespace ComfyEconomy {
                 return;
             }
 
-            ComfyEconomy.dbManager.InsertMine(x1, y1, x2, y2, tId, pId);
-            ComfyEconomy.mines = ComfyEconomy.dbManager.GetAllMines();
+            ComfyEconomy.DBManager.InsertMine(x1, y1, x2, y2, tId, pId);
+            ComfyEconomy.Mines = ComfyEconomy.DBManager.GetAllMines();
 
             args.Player.SendSuccessMessage("New mine has been added.");
-            Mine.RefillMine(ComfyEconomy.dbManager.GetMineIdFromX1Y1(x1, y1));
+            Mine.RefillMine(ComfyEconomy.DBManager.GetMineIdFromX1Y1(x1, y1));
 
             LogManager.Log("Command", args.Player.Name, $"Executed /addmine {x1} {y1} {x2} {y2} {tId} {pId}");
         }
@@ -255,7 +255,7 @@ namespace ComfyEconomy {
             string message = "";
 
             await Task.Run(() => {
-                List<Account> accounts = ComfyEconomy.dbManager.GetAllAccounts();
+                List<Account> accounts = ComfyEconomy.DBManager.GetAllAccounts();
                 accounts.Sort((a1, a2) => a2.Balance - a1.Balance);
 
                 Account a;

@@ -23,7 +23,7 @@ namespace ComfyEconomy.Database {
 
         public static bool RefillMine(int mineId) {
             bool isRefilled = false;
-            Mine mine = ComfyEconomy.dbManager.GetMine(mineId);
+            Mine mine = ComfyEconomy.DBManager.GetMine(mineId);
             mine.PosX2++;
             mine.PosY2++;
 
