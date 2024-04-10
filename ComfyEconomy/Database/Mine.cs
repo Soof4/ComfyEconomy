@@ -5,14 +5,17 @@ namespace ComfyEconomy.Database {
     public class Mine {
 
         public int MineID;
+        public string Name;
         public int PosX1;
         public int PosY1;
         public int PosX2;
         public int PosY2;
         public int TileID;
         public int PaintID;
-        public Mine(int mineID, int posX1, int posY1, int posX2, int posY2, int tileId, int paintID) {
+
+        public Mine(int mineID, string name, int posX1, int posY1, int posX2, int posY2, int tileId, int paintID) {
             MineID = mineID;
+            Name = name;
             PosX1 = posX1;
             PosX2 = posX2;
             PosY1 = posY1;

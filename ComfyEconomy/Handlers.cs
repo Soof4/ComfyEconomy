@@ -28,17 +28,10 @@ namespace ComfyEconomy
         }
 
 
-        public static void OnReload(ReloadEventArgs e)
+        public static void OnReload(ReloadEventArgs args)
         {
-            if (File.Exists(ComfyEconomy.ConfigPath))
-            {
-                ComfyEconomy.Config = Config.Read();
-            }
-            else
-            {
-                ComfyEconomy.Config.Write();
-            }
-            e.Player.SendSuccessMessage("ComfyEconomy has been reloaded.");
+            ComfyEconomy.Config = Config.Reload();
+            args.Player.SendSuccessMessage("ComfyEconomy has been reloaded.");
         }
 
         public static void OnGameUpdate(EventArgs args)
