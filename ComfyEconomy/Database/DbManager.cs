@@ -29,6 +29,14 @@ namespace ComfyEconomy.Database
                 new SqlColumn("PaintID", MySqlDbType.Int32)
                 ));
 
+            sqlCreator.EnsureTableStructure(new SqlTable("Jobs",
+                new SqlColumn("JobID", MySqlDbType.Int32) { Primary = true, Unique = true, AutoIncrement = true },
+                new SqlColumn("Owner", MySqlDbType.String),
+                new SqlColumn("ItemID", MySqlDbType.Int32),
+                new SqlColumn("Stack", MySqlDbType.Int32),
+                new SqlColumn("Payment", MySqlDbType.Int32),
+                new SqlColumn("Active", MySqlDbType.Int32)
+            ));
         }
 
 
@@ -116,9 +124,11 @@ namespace ComfyEconomy.Database
         }
 
         /// <exception cref="NullReferenceException"></exception>
-        public int GetMineIdFromName(string name) {
+        public int GetMineIdFromName(string name)
+        {
             using var reader = _db.QueryReader("SELECT * FROM Mines WHERE Name = @0", name);
-            while(reader.Read()) {
+            while (reader.Read())
+            {
                 return reader.Get<int>("MineID");
             }
             throw new NullReferenceException();
@@ -133,7 +143,8 @@ namespace ComfyEconomy.Database
             return _db.Query("DELETE FROM Mines WHERE MineID = @0", mineId) != 0;
         }
 
-        public bool DeleteMine(string name) {
+        public bool DeleteMine(string name)
+        {
             return _db.Query("DELETE FROM Mines WHERE Name = @0", name) != 0;
         }
 
@@ -152,12 +163,107 @@ namespace ComfyEconomy.Database
                     reader.Get<int>("PosY2"),
                     reader.Get<int>("TileID"),
                     reader.Get<int>("PaintID")
-                ));
+                    )
+                );
             }
 
             return mines;
         }
 
         #endregion
+
+
+        #region Job Methods
+        public bool InsertJob(string owner, int itemId, int stack, int payment)
+        {
+            return _db.Query("INSERT INTO Jobs (Owner, ItemID, Stack, Payment, Active) VALUES (@0, @1, @2, @3, 1)", owner, itemId, stack, payment) != 0;
+        }
+
+        public bool DeleteJob(int jobId)
+        {
+            return _db.Query("DELETE FROM Jobs WHERE JobID = @0", jobId) != 0;
+        }
+
+        public bool UpdateJob(int jobId, int itemId, int stack, int payment, bool active)
+        {
+            return _db.Query("UPDATE Jobs SET ItemID = @0, Stack = @1, Payment = @2, Active = @3 WHERE JobID = @4", itemId, stack, payment, active ? 1 : 0, jobId) != 0;
+        }
+        
+        public Job GetJob(int jobId)
+        {
+            using var reader = _db.QueryReader("SELECT * FROM Jobs WHERE JobID = @0", jobId);
+            while (reader.Read())
+            {
+                return new Job(
+                    reader.Get<int>("JobID"),
+                    reader.Get<string>("Owner"),
+                    reader.Get<int>("ItemID"),
+                    reader.Get<int>("Stack"),
+                    reader.Get<int>("Payment"),
+                    reader.Get<int>("Active") != 0
+                    );
+            }
+            throw new NullReferenceException();
+
+        }
+
+        public List<Job> GetAllJobs()
+        {
+            List<Job> jobs = new List<Job>();
+            using var reader = _db.QueryReader("SELECT * FROM Jobs");
+            while (reader.Read())
+            {
+                jobs.Add(new Job(
+                    reader.Get<int>("JobID"),
+                    reader.Get<string>("Owner"),
+                    reader.Get<int>("ItemID"),
+                    reader.Get<int>("Stack"),
+                    reader.Get<int>("Payment"),
+                    reader.Get<int>("Active") != 0
+                    )
+                );
+            }
+            return jobs;
+        }
+
+        public List<Job> GetAllActiveJobs()
+        {
+            List<Job> jobs = new List<Job>();
+            using var reader = _db.QueryReader("SELECT * FROM Jobs WHERE Active = 1");
+            while (reader.Read())
+            {
+                jobs.Add(new Job(
+                    reader.Get<int>("JobID"),
+                    reader.Get<string>("Owner"),
+                    reader.Get<int>("ItemID"),
+                    reader.Get<int>("Stack"),
+                    reader.Get<int>("Payment"),
+                    reader.Get<int>("Active") != 0
+                    )
+                );
+            }
+            return jobs;
+        }
+
+        public List<Job> GetPlayerDeactiveJobs(string owner)
+        {
+            List<Job> jobs = new List<Job>();
+            using var reader = _db.QueryReader("SELECT * FROM Jobs WHERE Owner = @0 AND Active = 0", owner);
+            while (reader.Read())
+            {
+                jobs.Add(new Job(
+                    reader.Get<int>("JobID"),
+                    reader.Get<string>("Owner"),
+                    reader.Get<int>("ItemID"),
+                    reader.Get<int>("Stack"),
+                    reader.Get<int>("Payment"),
+                    reader.Get<int>("Active") != 0
+                    )
+                );
+            }
+            return jobs;
+        }
+        #endregion
+
     }
 }

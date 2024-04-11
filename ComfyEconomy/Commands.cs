@@ -3,6 +3,7 @@ using ComfyEconomy.Database;
 using Terraria;
 using System.Runtime.Intrinsics.X86;
 using Microsoft.Xna.Framework;
+using Terraria.Localization;
 
 namespace ComfyEconomy
 {
@@ -49,6 +50,13 @@ namespace ComfyEconomy
                 AllowServer = true,
                 HelpText = "Shows the top 5 wealthiest players.",
                 DoLog = false
+            });
+
+            TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.job", JobCmd, "job")
+            {
+                AllowServer = false,
+                HelpText = "Post/claim/delete/list jobs.",
+                DoLog = true
             });
         }
 
@@ -320,7 +328,8 @@ namespace ComfyEconomy
                         return;
                     }
 
-                    if (plr.TempPoints[0] == Point.Zero || plr.TempPoints[1] == Point.Zero) {
+                    if (plr.TempPoints[0] == Point.Zero || plr.TempPoints[1] == Point.Zero)
+                    {
                         plr.SendErrorMessage("You need to set the points before using this sub-command. ");
                         return;
                     }
@@ -368,15 +377,18 @@ namespace ComfyEconomy
                     }
                     break;
                 case "refill":
-                    if (args.Parameters.Count < 2) {
+                    if (args.Parameters.Count < 2)
+                    {
                         plr.SendErrorMessage("You need to specify the name of the mşne you want to refill.");
                         return;
                     }
 
                     string mName = string.Join(" ", args.Parameters.GetRange(1, args.Parameters.Count - 1));
 
-                    foreach (Mine m in ComfyEconomy.Mines) {
-                        if (mName == m.Name) {
+                    foreach (Mine m in ComfyEconomy.Mines)
+                    {
+                        if (mName == m.Name)
+                        {
                             Mine.RefillMine(m.MineID);
                             TSPlayer.All.SendMessage($"[i:3509]  {m.Name} has been refilled.", 153, 255, 204);
                             return;
@@ -423,6 +435,225 @@ namespace ComfyEconomy
             });
 
             args.Player.SendInfoMessage(message);
+        }
+
+        public static void JobCmd(CommandArgs args)
+        {
+            TSPlayer plr = args.Player;
+
+            if (args.Parameters.Count < 1)
+            {
+                plr.SendErrorMessage("Missing the sub-command.");
+                return;
+            }
+
+            switch (args.Parameters[0])
+            {
+                case "post":
+                    {
+                        if (args.Parameters.Count < 4)    //eg. /job post itemName stack payment
+                        {
+                            plr.SendErrorMessage("Missing arguments. Usage: /job post <item name or ID> <stack> <payment>");
+                            return;
+                        }
+                        Item? item = null;
+                        int itemId, stack, payment;
+
+                        try
+                        {
+                            item = TShock.Utils.GetItemByIdOrName(string.Join(" ", args.Parameters.GetRange(1, args.Parameters.Count - 3)))[0];
+                            itemId = item.netID;
+                            stack = int.Parse(args.Parameters[^2]);
+                            payment = int.Parse(args.Parameters[^1]);
+                        }
+                        catch
+                        {
+                            plr.SendErrorMessage("Couldn't parse the arguments.");
+                            return;
+                        }
+
+                        if (payment < 0)
+                        {
+                            plr.SendErrorMessage("You can't post a job with negative amount of payment.");
+                            return;
+                        }
+
+                        if (stack < 1 || stack > item.maxStack)
+                        {
+                            plr.SendErrorMessage("Invalid stack amount.");
+                            return;
+                        }
+
+                        Account owner = ComfyEconomy.DBManager.GetAccount(plr.Name);
+
+                        if (owner.Balance < payment)
+                        {
+                            plr.SendErrorMessage("You don't have enough balance to post this job.");
+                            return;
+                        }
+
+                        ComfyEconomy.DBManager.InsertJob(owner.AccountName, itemId, stack, payment);
+                        ComfyEconomy.DBManager.SaveAccount(owner.AccountName, owner.Balance - payment);
+
+                        plr.SendSuccessMessage("Successfully posted the job!");
+                        break;
+                    }
+                case "apply":
+                    {
+                        if (args.Parameters.Count < 2)    //eg. /job claim jobID
+                        {
+                            plr.SendErrorMessage("Missing arguments. Usage: /job apply <job ID>");
+                            return;
+                        }
+
+                        int jobId;
+                        Job? job = null;
+
+                        try
+                        {
+                            jobId = int.Parse(args.Parameters[1]);
+                            job = ComfyEconomy.DBManager.GetJob(jobId);
+                        }
+                        catch
+                        {
+                            if (job != null)
+                            {
+                                plr.SendErrorMessage("Couldn't parse the arguments.");
+                                return;
+                            }
+                            plr.SendErrorMessage("Couldn't find the job!");
+                            return;
+                        }
+
+                        if (plr.SelectedItem.netID != job.ItemID)
+                        {
+                            plr.SendErrorMessage("The item you're holding doesn't match the job's.");
+                            return;
+                        }
+
+                        if (plr.SelectedItem.stack < job.Stack)
+                        {
+                            plr.SendErrorMessage("You don't have enough of that item to claim the job.");
+                            return;
+                        }
+
+                        plr.SelectedItem.stack -= job.Stack;
+                        NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, NetworkText.FromLiteral(plr.SelectedItem.Name), plr.Index, plr.TPlayer.selectedItem);
+                        NetMessage.SendData((int)PacketTypes.PlayerSlot, plr.Index, -1, NetworkText.FromLiteral(plr.SelectedItem.Name), plr.Index, plr.TPlayer.selectedItem);
+
+                        Account claimer = ComfyEconomy.DBManager.GetAccount(plr.Name);
+                        ComfyEconomy.DBManager.SaveAccount(plr.Name, claimer.Balance + job.Payment);
+                        ComfyEconomy.DBManager.UpdateJob(job.JobID, job.ItemID, job.Stack, job.Payment, false);
+
+                        plr.SendSuccessMessage($"Successfully applied to the job! (+{job.Payment} balance)");
+                        break;
+                    }
+                case "delete":    //job delete <job ID>
+                case "del":
+                    {
+                        if (args.Parameters.Count < 2)    //eg. /job claim jobID
+                        {
+                            plr.SendErrorMessage("Missing arguments. Usage: /job delete <job ID>");
+                            return;
+                        }
+
+                        int jobId;
+                        Job? job = null;
+
+                        try
+                        {
+                            jobId = int.Parse(args.Parameters[1]);
+                            job = ComfyEconomy.DBManager.GetJob(jobId);
+                        }
+                        catch
+                        {
+                            if (job != null)
+                            {
+                                plr.SendErrorMessage("Couldn't parse the arguments.");
+                                return;
+                            }
+                            plr.SendErrorMessage("Couldn't find the job!");
+                            return;
+                        }
+
+                        if (job.Owner != plr.Name)
+                        {
+                            plr.SendErrorMessage("You can't delete someone else's job post!");
+                            return;
+                        }
+
+                        Account owner = ComfyEconomy.DBManager.GetAccount(plr.Name);
+                        ComfyEconomy.DBManager.SaveAccount(owner.AccountName, owner.Balance + job.Payment);
+                        ComfyEconomy.DBManager.DeleteJob(jobId);
+
+                        plr.SendSuccessMessage("Successfully deleted the job!");
+                        break;
+                    }
+                case "list":    //eg. /job list [page number]
+                    {
+                        int page = 1;
+                        try
+                        {
+                            page = int.Parse(args.Parameters[1]);
+                        }
+                        catch { }
+
+                        List<Job> jobs = ComfyEconomy.DBManager.GetAllActiveJobs();
+                        
+                        if (jobs.Count == 0)
+                        {
+                            plr.SendInfoMessage("There are no active jobs right now!");
+                            return;
+                        }
+                        
+                        int maxPage = (int)Math.Ceiling(Math.Round(jobs.Count / 5.0, 1));
+
+                        if (page > maxPage)
+                        {
+                            page = maxPage;
+                        }
+
+                        string msg = $"Jobs (Page {page}/{maxPage}):";
+
+
+
+                        for (int i = page * 5 - 5; i < page * 5; i++)
+                        {
+                            if (i >= jobs.Count)
+                            {
+                                break;
+                            }
+                            Job j = jobs[i];
+                            string itemName = TShock.Utils.GetItemById(j.ItemID).Name;
+                            msg += $"\n{j.JobID} : [i/s{j.Stack}:{j.ItemID}] {itemName} ({j.Stack}) : ${j.Payment} : {j.Owner}";
+                        }
+                        msg += "\nTo apply a job, do /job apply <job ID>";
+                        plr.SendInfoMessage(msg);
+
+                        break;
+                    }
+                case "claim":    //eg. /job claim
+                    {
+                        List<Job> jobs = ComfyEconomy.DBManager.GetPlayerDeactiveJobs(plr.Name);
+                        foreach (Job j in jobs)
+                        {
+                            plr.GiveItem(j.ItemID, j.Stack);
+                            ComfyEconomy.DBManager.DeleteJob(j.JobID);
+                        }
+                    }
+
+                    break;
+                case "help":
+                    {
+                        break;
+                    }
+                default:
+                    {
+                        break;
+                    }
+            }
+
+
         }
     }
 }
