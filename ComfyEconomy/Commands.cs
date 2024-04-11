@@ -576,6 +576,12 @@ namespace ComfyEconomy
                             return;
                         }
 
+                        if (!job.Active)
+                        {
+                            plr.SendErrorMessage("Couldn't find the job!");
+                            return;
+                        }
+
                         if (job.Owner != plr.Name)
                         {
                             plr.SendErrorMessage("You can't delete someone else's job post!");
@@ -599,13 +605,13 @@ namespace ComfyEconomy
                         catch { }
 
                         List<Job> jobs = ComfyEconomy.DBManager.GetAllActiveJobs();
-                        
+
                         if (jobs.Count == 0)
                         {
                             plr.SendInfoMessage("There are no active jobs right now!");
                             return;
                         }
-                        
+
                         int maxPage = (int)Math.Ceiling(Math.Round(jobs.Count / 5.0, 1));
 
                         if (page > maxPage)
@@ -645,15 +651,21 @@ namespace ComfyEconomy
                     break;
                 case "help":
                     {
+                        plr.SendInfoMessage("Sub-commands and their definitions:\n" +
+                                            "/job post <item name or ID> <stack> <payment> : Posts a job.\n" +
+                                            "/job apply <job ID> : Apply for a job. Applying for a job means that you already have the required item in your hand.\n" +
+                                            "/job delete <job ID> : Delete your job and get a refund.\n" +
+                                            "/job list [page number] : Shows a list of active jobs.\n" +
+                                            "/job claim : Claim your items from the completed jobs.\n" +
+                                            "/job help : Shows this message.");
                         break;
                     }
                 default:
                     {
+                        plr.SendErrorMessage("Invalid sub-command. Do \"/job help\" to see them all.");
                         break;
                     }
             }
-
-
         }
     }
 }
