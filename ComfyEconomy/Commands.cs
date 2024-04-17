@@ -53,7 +53,7 @@ namespace ComfyEconomy
             });
         }
 
-        
+
         private static void BalanceAdminCmd(CommandArgs args)
         {
             if (args.Parameters.Count < 3)
@@ -111,7 +111,6 @@ namespace ComfyEconomy
                         );
                     return;
             }
-
         }
 
         public static void BalanceCmd(CommandArgs args)
