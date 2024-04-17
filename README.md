@@ -8,15 +8,10 @@ A TShock economy plugin.
 | comfyeco.bal.admin | baladmin, balanceadmin |
 | comfyeco.pay       | pay                    |
 | comfyeco.addmine   | addmine                |
-| comfyeco.updateeco | updateeco              |
 
 | Permissions         | Function                                                          |
 |---------------------|-------------------------------------------------------------------|
 | comfyeco.serversign | To be able to place server signs (-S-Buy-, -S-Sell-, -S-Command-, -S-Trade-) |
-
-**Note**: _If you're updating to v.1.3.0 from an earlier version, you can update shop sign formatting with ``/updateeco``._ <br>
-          _Using this command multiple times will break the shop signs._ <br>
-          _If you're not updating from an earlier version you don't need to use this command. If you do it'll break the shop signs._
 
 ## Shop Sign Syntax
 ### Item Signs (-Buy-, -S-Buy-, -S-Sell-)

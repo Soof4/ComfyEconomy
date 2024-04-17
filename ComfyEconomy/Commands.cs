@@ -38,13 +38,6 @@ namespace ComfyEconomy
                 DoLog = true
             });
 
-            TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.updateeco", UpdateEcoCmd, "updateeco")
-            {
-                AllowServer = true,
-                HelpText = "This command will do some updates related to ComfyEconomy.\nDO NOT USE THIS COMMAND IF YOU'RE NOT UPDATING FROM AN EARLIER VERSION OF COMFYECONOMY.",
-                DoLog = true
-            });
-
             TShockAPI.Commands.ChatCommands.Add(new Command("comfyeco.toprich", TopRichCmd, "toprich")
             {
                 AllowServer = true,
@@ -60,70 +53,7 @@ namespace ComfyEconomy
             });
         }
 
-        private static void UpdateEcoCmd(CommandArgs args)
-        {
-            for (int i = 0; i < Sign.maxSigns; i++)
-            {
-                Sign sign = Main.sign[i];
-
-                if (sign == null || sign.text == null)
-                {
-                    continue;
-                }
-
-                if (sign.text.StartsWith("-Buy-"))
-                {
-                    string[] lines = sign.text.Split('\n');
-
-                    List<Item> item = TShock.Utils.GetItemByName(lines[1][6..]);
-
-                    if (!lines[1].Contains('#'))
-                    {
-                        lines[1] = $"Name: {lines[1][6..]} #{item[0].netID}";
-                    }
-
-                    lines[3] = $"Price: {lines[3][5..]}";
-                    sign.text = string.Join('\n', lines);
-
-                    TSPlayer.All.SendData(PacketTypes.SignNew, "", i);
-                }
-                else if (sign.text.StartsWith("-S-Buy-"))
-                {
-                    string[] lines = sign.text.Split('\n');
-
-                    List<Item> item = TShock.Utils.GetItemByName(lines[1][6..]);
-
-                    if (!lines[1].Contains('#'))
-                    {
-                        lines[1] = $"Name: {lines[1][6..]} #{item[0].netID}";
-                    }
-
-                    lines[3] = $"Price: {lines[3][5..]}";
-                    sign.text = string.Join('\n', lines);
-
-                    TSPlayer.All.SendData(PacketTypes.SignNew, "", i);
-                }
-                else if (sign.text.StartsWith("-S-Sell-"))
-                {
-                    string[] lines = sign.text.Split('\n');
-
-                    List<Item> item = TShock.Utils.GetItemByName(lines[1][6..]);
-
-                    if (!lines[1].Contains('#'))
-                    {
-                        lines[1] = $"Name: {lines[1][6..]} #{item[0].netID}";
-                    }
-
-                    lines[3] = $"Price: {lines[3][5..]}";
-                    sign.text = string.Join('\n', lines);
-
-                    TSPlayer.All.SendData(PacketTypes.SignNew, "", i);
-                }
-            }
-
-            LogManager.Log("Command", args.Player.Name, "Executed /updateeco");
-        }
-
+        
         private static void BalanceAdminCmd(CommandArgs args)
         {
             if (args.Parameters.Count < 3)
