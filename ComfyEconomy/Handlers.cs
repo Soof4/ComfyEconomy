@@ -9,6 +9,7 @@ namespace ComfyEconomy
 {
     public static class Handlers
     {
+        private static DateTime MineSavedTime = DateTime.UtcNow;
         private static bool ForceNextMineRefill = false;
 
         public static void InitializeHandlers(TerrariaPlugin registrator)
@@ -38,24 +39,25 @@ namespace ComfyEconomy
 
         public static void OnGameUpdate(EventArgs args)
         {
-            if ((DateTime.UtcNow - ComfyEconomy.MineSavedTime).TotalMinutes < ComfyEconomy.Config.MineRefillIntervalInMins) return;
+            if ((DateTime.UtcNow - MineSavedTime).TotalMinutes < ComfyEconomy.Config.MineRefillIntervalInMins) return;
 
             int activePlrCount = TShock.Utils.GetActivePlayerCount();
             bool minesRefilled = false;
 
             if (activePlrCount > 0) TSPlayer.All.SendMessage("[i:3509]  Refilling the mines. Possible lag spike.", 255, 153, 204);
-
+            
+            // Check if there are any active players in any of the mines
             if (!ForceNextMineRefill)
             {
                 foreach (var mine in ComfyEconomy.Mines)
                 {
                     foreach (TSPlayer plr in TShock.Players)
                     {
-                        if (plr != null && plr.Active && !plr.Dead && plr.TileX <= mine.PosX2 && plr.TileX + 1 >= mine.PosX1 && plr.TileY + 2 >= mine.PosY1 && plr.TileY <= mine.PosY2)
+                        if (plr != null && plr.Active && !plr.Dead && Utils.IsPlayerInMine(plr, mine))
                         {
                             TSPlayer.All.SendMessage($"[i:3509]  Couldn't refill, there were active players in mines.\n" +
                                 $"[i:15]  Refilling has been postponed for {ComfyEconomy.Config.MinePostponeMins} mins.", 255, 68, 119);
-                            ComfyEconomy.MineSavedTime = ComfyEconomy.MineSavedTime.AddMinutes(ComfyEconomy.Config.MinePostponeMins);
+                            MineSavedTime = MineSavedTime.AddMinutes(ComfyEconomy.Config.MinePostponeMins);
                             ForceNextMineRefill = true;
                             return;
                         }
@@ -63,8 +65,10 @@ namespace ComfyEconomy
                 }
             }
 
+            // Try to refill all mines
             foreach (var mine in ComfyEconomy.Mines) if (mine.Refill()) minesRefilled = true;
 
+            // Send the info message
             if (activePlrCount > 0)
             {
                 if (minesRefilled) TSPlayer.All.SendMessage("[i:3509]  Mines have been refilled.", 153, 255, 204);
@@ -72,7 +76,7 @@ namespace ComfyEconomy
             }
 
             ForceNextMineRefill = false;
-            ComfyEconomy.MineSavedTime = DateTime.UtcNow;
+            MineSavedTime = DateTime.UtcNow;
         }
 
         public static void OnNetGreetPlayer(GreetPlayerEventArgs args)

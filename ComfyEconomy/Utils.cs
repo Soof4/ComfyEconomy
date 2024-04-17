@@ -1,3 +1,4 @@
+using ComfyEconomy.Database;
 using Microsoft.Xna.Framework;
 using Terraria;
 using TShockAPI;
@@ -19,6 +20,10 @@ namespace ComfyEconomy
             player.Group = TShock.Groups.GetGroupByName("superadmin");
             TShockAPI.Commands.HandleCommand(player, command);
             player.Group = plrGroup;
+        }
+
+        public static bool IsPlayerInMine(TSPlayer player, Mine mine) {
+            return player.TileX <= mine.PosX2 && player.TileX + 1 >= mine.PosX1 && player.TileY + 2 >= mine.PosY1 && player.TileY <= mine.PosY2;
         }
     }
 }
