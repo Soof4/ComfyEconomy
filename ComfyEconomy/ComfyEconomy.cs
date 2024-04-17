@@ -21,12 +21,12 @@ namespace ComfyEconomy
 
         public static DateTime MineSavedTime = DateTime.UtcNow;
         public static List<Mine> Mines = new List<Mine>();
-        private static IDbConnection DB = new SqliteConnection(("Data Source=" + Path.Combine(TShock.SavePath, "ComfyEconomy.sqlite")));
+        private static IDbConnection DB = new SqliteConnection("Data Source=" + Path.Combine(TShock.SavePath, "ComfyEconomy.sqlite"));
         public static DbManager DBManager = new DbManager(DB);
 
 
         public static Config Config = Config.Reload();
-        public static bool ForceNextMineRefill = false;
+
 
         public override void Initialize()
         {

@@ -420,6 +420,7 @@ namespace ComfyEconomy.Database
                    int.Parse(lines[4][20..])
                    );
         }
+        
         public static int GetSignIdByPos(int x, int y)
         {
             for (int i = 0; i < 1000; i++)
@@ -444,14 +445,5 @@ namespace ComfyEconomy.Database
             return -1;
         }
 
-    }
-
-    public enum Tag
-    {
-        Buy,
-        Sell,
-        ServerBuy,
-        ServerSell,
-        ServerCommand
     }
 }

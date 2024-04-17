@@ -87,6 +87,21 @@ namespace ComfyEconomy.Database
             return accounts;
         }
 
+        public List<Account> GetTop5Accounts()
+        {
+            List<Account> accounts = new List<Account>();
+            using var reader = _db.QueryReader("SELECT * FROM Accounts ORDER BY Balance DESC LIMIT 5");
+            while (reader.Read())
+            {
+                accounts.Add(new Account(
+                    reader.Get<string>("AccountName"),
+                    reader.Get<int>("Balance")
+                ));
+            }
+
+            return accounts;
+
+        }
         #endregion
 
 
@@ -134,6 +149,11 @@ namespace ComfyEconomy.Database
             throw new NullReferenceException();
         }
 
+        public bool InsertMne(Mine mine)
+        {
+            return _db.Query("INSERT INTO Mines (Name, PosX1, PosY1, PosX2, PosY2, TileID, PaintID) VALUES (@0, @1, @2, @3, @4, @5, @6)",
+            mine.Name, mine.PosX1, mine.PosY1, mine.PosX2, mine.PosY2, mine.TileID, mine.PaintID) != 0;
+        }
         public bool InsertMine(string name, int posX1, int posY1, int posX2, int posY2, int tileId, int paintId)
         {
             return _db.Query("INSERT INTO Mines (Name, PosX1, PosY1, PosX2, PosY2, TileID, PaintID) VALUES (@0, @1, @2, @3, @4, @5, @6)", name, posX1, posY1, posX2, posY2, tileId, paintId) != 0;
@@ -188,7 +208,7 @@ namespace ComfyEconomy.Database
         {
             return _db.Query("UPDATE Jobs SET ItemID = @0, Stack = @1, Payment = @2, Active = @3 WHERE JobID = @4", itemId, stack, payment, active ? 1 : 0, jobId) != 0;
         }
-        
+
         public Job GetJob(int jobId)
         {
             using var reader = _db.QueryReader("SELECT * FROM Jobs WHERE JobID = @0", jobId);

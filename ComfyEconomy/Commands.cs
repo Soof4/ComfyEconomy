@@ -339,19 +339,16 @@ namespace ComfyEconomy
                     ComfyEconomy.Mines = ComfyEconomy.DBManager.GetAllMines();
 
                     args.Player.SendSuccessMessage("New mine has been added.");
-                    Mine.RefillMine(ComfyEconomy.DBManager.GetMineIdFromName(name));
+                    int mineId = ComfyEconomy.DBManager.GetMineIdFromName(name);
+                    Mine newMine = ComfyEconomy.DBManager.GetMine(mineId);
+                    newMine.Refill();
 
                     LogManager.Log("Command", args.Player.Name, $"Executed /addmine {tId} {pId} {name}");
                     break;
                 case "list":
                 case "ls":
-                    List<Mine> mines = ComfyEconomy.DBManager.GetAllMines();
-
                     string msg = "Mines:\n";
-                    foreach (Mine m in mines)
-                    {
-                        msg += $"{m.Name},";
-                    }
+                    foreach (Mine m in ComfyEconomy.Mines) msg += $"{m.Name},";
                     msg.Remove(msg.Length - 1);
 
                     plr.SendInfoMessage(msg);
@@ -389,7 +386,7 @@ namespace ComfyEconomy
                     {
                         if (mName == m.Name)
                         {
-                            Mine.RefillMine(m.MineID);
+                            m.Refill();
                             TSPlayer.All.SendMessage($"[i:3509]  {m.Name} has been refilled.", 153, 255, 204);
                             return;
                         }
@@ -411,30 +408,20 @@ namespace ComfyEconomy
 
         public static async void TopRichCmd(CommandArgs args)
         {
-            string message = "";
-
             await Task.Run(() =>
             {
-                List<Account> accounts = ComfyEconomy.DBManager.GetAllAccounts();
+                string message = "";
+                List<Account> accounts = ComfyEconomy.DBManager.GetTop5Accounts();
                 accounts.Sort((a1, a2) => a2.Balance - a1.Balance);
 
-                Account a;
+                if (accounts.Count == 0) message = "List is empty!";
 
-                if (accounts.TryGetValue(0, out a))
-                {
+                foreach (Account a in accounts) {
                     message += $"{1}. {a.AccountName} : {a.Balance}";
                 }
 
-                for (int i = 1; i < 5; i++)
-                {
-                    if (accounts.TryGetValue(i, out a))
-                    {
-                        message += $"\n{i + 1}. {a.AccountName} : {a.Balance}";
-                    }
-                }
+                args.Player.SendInfoMessage(message);
             });
-
-            args.Player.SendInfoMessage(message);
         }
 
         public static void JobCmd(CommandArgs args)

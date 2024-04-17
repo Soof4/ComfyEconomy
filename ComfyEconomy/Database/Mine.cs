@@ -24,6 +24,26 @@ namespace ComfyEconomy.Database {
             PaintID = paintID;
         }
 
+        public bool Refill() {
+            bool isRefilled = false;
+
+            for (int i = PosX1; i <= PosX2; i++) {
+                for (int j = PosY1; j <= PosY2; j++) {
+                    if (Main.tile[i, j].type != TileID || Main.tile[i, j].color() != PaintID) {
+                        WorldGen.PlaceTile(i, j, TileID, forced: true);
+                        WorldGen.paintTile(i, j, (byte)PaintID);
+                        isRefilled = true;
+                    }
+                }
+            }
+            
+            if (isRefilled) {
+                TSPlayer.All.SendTileRect((short)PosX1, (short)PosY1, (byte)(PosX2 - PosX1 + 1), (byte)(PosY2 - PosY1 + 1));
+            }
+
+            return isRefilled;
+        }
+        /*
         public static bool RefillMine(int mineId) {
             bool isRefilled = false;
             Mine mine = ComfyEconomy.DBManager.GetMine(mineId);
@@ -45,6 +65,6 @@ namespace ComfyEconomy.Database {
             }
 
             return isRefilled;
-        }
+        }*/
     }
 }

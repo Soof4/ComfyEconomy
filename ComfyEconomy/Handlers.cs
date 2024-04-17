@@ -9,6 +9,8 @@ namespace ComfyEconomy
 {
     public static class Handlers
     {
+        private static bool ForceNextMineRefill = false;
+
         public static void InitializeHandlers(TerrariaPlugin registrator)
         {
             ServerApi.Hooks.NetGreetPlayer.Register(registrator, OnNetGreetPlayer);
@@ -36,57 +38,41 @@ namespace ComfyEconomy
 
         public static void OnGameUpdate(EventArgs args)
         {
-            if ((DateTime.UtcNow - ComfyEconomy.MineSavedTime).TotalMinutes > ComfyEconomy.Config.MineRefillIntervalInMins)
+            if ((DateTime.UtcNow - ComfyEconomy.MineSavedTime).TotalMinutes < ComfyEconomy.Config.MineRefillIntervalInMins) return;
+
+            int activePlrCount = TShock.Utils.GetActivePlayerCount();
+            bool minesRefilled = false;
+
+            if (activePlrCount > 0) TSPlayer.All.SendMessage("[i:3509]  Refilling the mines. Possible lag spike.", 255, 153, 204);
+
+            if (!ForceNextMineRefill)
             {
-                int activePlrCount = TShock.Utils.GetActivePlayerCount();
-                bool minesRefilled = false;
-
-                if (activePlrCount > 0)
+                foreach (var mine in ComfyEconomy.Mines)
                 {
-                    TSPlayer.All.SendMessage("[i:3509]  Refilling the mines. Possible lag spike.", 255, 153, 204);
-                }
-
-                if (!ComfyEconomy.ForceNextMineRefill)
-                {
-                    foreach (var mine in ComfyEconomy.Mines)
+                    foreach (TSPlayer plr in TShock.Players)
                     {
-                        foreach (TSPlayer plr in TShock.Players)
+                        if (plr != null && plr.Active && !plr.Dead && plr.TileX <= mine.PosX2 && plr.TileX + 1 >= mine.PosX1 && plr.TileY + 2 >= mine.PosY1 && plr.TileY <= mine.PosY2)
                         {
-                            if (plr != null && plr.Active && !plr.Dead && plr.TileX <= mine.PosX2 && plr.TileX + 1 >= mine.PosX1 && plr.TileY + 2 >= mine.PosY1 && plr.TileY <= mine.PosY2)
-                            {
-                                TSPlayer.All.SendMessage($"[i:3509]  Couldn't refill, there were active players in mines.\n" +
-                                    $"[i:15]  Refilling has been postponed for {ComfyEconomy.Config.MinePostponeMins} mins.", 255, 68, 119);
-                                ComfyEconomy.MineSavedTime = ComfyEconomy.MineSavedTime.AddMinutes(ComfyEconomy.Config.MinePostponeMins);
-                                ComfyEconomy.ForceNextMineRefill = true;
-                                return;
-                            }
+                            TSPlayer.All.SendMessage($"[i:3509]  Couldn't refill, there were active players in mines.\n" +
+                                $"[i:15]  Refilling has been postponed for {ComfyEconomy.Config.MinePostponeMins} mins.", 255, 68, 119);
+                            ComfyEconomy.MineSavedTime = ComfyEconomy.MineSavedTime.AddMinutes(ComfyEconomy.Config.MinePostponeMins);
+                            ForceNextMineRefill = true;
+                            return;
                         }
                     }
                 }
-
-                foreach (var mine in ComfyEconomy.Mines)
-                {
-                    if (Database.Mine.RefillMine(mine.MineID))
-                    {
-                        minesRefilled = true;
-                    }
-                }
-
-                if (activePlrCount > 0)
-                {
-                    if (minesRefilled)
-                    {
-                        TSPlayer.All.SendMessage("[i:3509]  Mines have been refilled.", 153, 255, 204);
-                    }
-                    else
-                    {
-                        TSPlayer.All.SendMessage("[i:3509]  Couldn't refill, mines were already full.", 255, 68, 119);
-                    }
-                }
-
-                ComfyEconomy.ForceNextMineRefill = false;
-                ComfyEconomy.MineSavedTime = DateTime.UtcNow;
             }
+
+            foreach (var mine in ComfyEconomy.Mines) if (mine.Refill()) minesRefilled = true;
+
+            if (activePlrCount > 0)
+            {
+                if (minesRefilled) TSPlayer.All.SendMessage("[i:3509]  Mines have been refilled.", 153, 255, 204);
+                else TSPlayer.All.SendMessage("[i:3509]  Couldn't refill, mines were already full.", 255, 68, 119);
+            }
+
+            ForceNextMineRefill = false;
+            ComfyEconomy.MineSavedTime = DateTime.UtcNow;
         }
 
         public static void OnNetGreetPlayer(GreetPlayerEventArgs args)
@@ -98,29 +84,25 @@ namespace ComfyEconomy
             catch (NullReferenceException)
             {
                 ComfyEconomy.DBManager.InsertAccount(TShock.Players[args.Who].Name, 100);
-                TShock.Players[args.Who].SendInfoMessage("A bank account has been created for you.");
             }
         }
 
         public static void OnSignChange(object? sender, GetDataHandlers.SignEventArgs args)
         {
-            if (args.Handled)
-            {
-                return;
-            }
+            if (args.Handled) return;
 
+            // Reading the data
             args.Data.Seek(0, SeekOrigin.Begin);
             int signId = args.Data.ReadInt16();
             int posX = args.Data.ReadInt16();
             int posY = args.Data.ReadInt16();
             string newText = args.Data.ReadString();
 
+            // Check against region protections
             IEnumerable<TShockAPI.DB.Region> region = TShock.Regions.InAreaRegion(posX, posY);
-            if (region.Any() && !region.First().Owner.Equals(args.Player.Name))
-            {
-                return;
-            }
+            if (region.Any() && !region.First().Owner.Equals(args.Player.Name)) return;
 
+            // Detect shop sign -> standardize text -> change sign -> send packet
             if (newText.StartsWith("-Buy-") || newText.StartsWith("-S-Buy-") || newText.StartsWith("-S-Sell-") || newText.StartsWith("-S-Command-") || newText.StartsWith("-S-Trade-"))
             {
                 newText = ShopSign.StandardizeText(newText, args.Player);
@@ -134,15 +116,13 @@ namespace ComfyEconomy
 
         public static void OnSignRead(object? sender, GetDataHandlers.SignReadEventArgs args)
         {
+            // Read the data
             args.Data.Seek(0, SeekOrigin.Begin);
             int posX = args.Data.ReadInt16();
             int posY = args.Data.ReadInt16();
             int signID = ShopSign.GetSignIdByPos(posX, posY);
 
-            if (signID == -1)
-            {  // sign is new
-                return;
-            }
+            if (signID == -1) return;    // If sign is new -> return
 
             string text = Main.sign[signID].text;
 
