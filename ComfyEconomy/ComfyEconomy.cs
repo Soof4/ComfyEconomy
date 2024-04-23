@@ -1,12 +1,9 @@
 ﻿using ComfyEconomy.Database;
 using Microsoft.Data.Sqlite;
-using Microsoft.Xna.Framework;
 using System.Data;
-using System.IO.Streams;
 using Terraria;
 using TerrariaApi.Server;
 using TShockAPI;
-using TShockAPI.Hooks;
 
 namespace ComfyEconomy
 {
@@ -22,11 +19,11 @@ namespace ComfyEconomy
         public override string Description => "Economy plugin with shop signs and mines.";
 
         #endregion
-        
+
         public static List<Mine> Mines = new List<Mine>();
         private static IDbConnection DB = new SqliteConnection("Data Source=" + Path.Combine(TShock.SavePath, "ComfyEconomy.sqlite"));
         public static DbManager DBManager = new DbManager(DB);
-        public static Config Config = Config.Reload();
+        public static Configuration Config = Configuration.Reload();
 
         public override void Initialize()
         {
@@ -35,16 +32,11 @@ namespace ComfyEconomy
             LogManager.InitializeLogging();
 
             Mines = DBManager.GetAllMines();
-            Config = Config.Reload();
+            Config = Configuration.Reload();
         }
-
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                Handlers.DisposeHandlers(this);
-            }
-
+            if (disposing) Handlers.DisposeHandlers(this);
             base.Dispose(disposing);
         }
     }

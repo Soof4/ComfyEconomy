@@ -1,6 +1,5 @@
 using TShockAPI;
 
-
 namespace ComfyEconomy
 {
     public class LogManager

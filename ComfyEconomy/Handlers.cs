@@ -2,7 +2,6 @@ using System.IO.Streams;
 using Terraria;
 using TShockAPI;
 using TShockAPI.Hooks;
-using ComfyEconomy.Database;
 using TerrariaApi.Server;
 
 namespace ComfyEconomy
@@ -33,7 +32,7 @@ namespace ComfyEconomy
 
         public static void OnReload(ReloadEventArgs args)
         {
-            ComfyEconomy.Config = Config.Reload();
+            ComfyEconomy.Config = Configuration.Reload();
             args.Player.SendSuccessMessage("ComfyEconomy has been reloaded.");
         }
 

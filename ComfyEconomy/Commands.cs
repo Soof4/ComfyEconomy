@@ -1,7 +1,6 @@
 ﻿using TShockAPI;
 using ComfyEconomy.Database;
 using Terraria;
-using System.Runtime.Intrinsics.X86;
 using Microsoft.Xna.Framework;
 using Terraria.Localization;
 

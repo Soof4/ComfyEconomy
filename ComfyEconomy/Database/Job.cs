@@ -1,6 +1,3 @@
-using Terraria;
-using TShockAPI;
-
 namespace ComfyEconomy
 {
     public class Job

@@ -3,25 +3,22 @@ using TShockAPI;
 
 namespace ComfyEconomy
 {
-    public class Config
+    public class Configuration
     {
         public static string ConfigPath = Path.Combine(TShock.SavePath, "ComfyEconomyConfig.json");
         public int MineRefillIntervalInMins = 60;
         public int MinePostponeMins = 5;
         public bool EnableLogs = true;
 
-        public static Config Reload()
+        public static Configuration Reload()
         {
-            Config? c = null;
+            Configuration? c = null;
 
-            if (File.Exists(ConfigPath))
-            {
-                c = JsonConvert.DeserializeObject<Config>(File.ReadAllText(ConfigPath));
-            }
+            if (File.Exists(ConfigPath)) c = JsonConvert.DeserializeObject<Configuration>(File.ReadAllText(ConfigPath));
 
             if (c == null)
             {
-                c = new Config();
+                c = new Configuration();
                 File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(c, Formatting.Indented));
             }
 
