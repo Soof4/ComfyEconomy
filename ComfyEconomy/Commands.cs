@@ -215,7 +215,7 @@ namespace ComfyEconomy
                 return;
             }
 
-            switch (args.Parameters[0])
+            switch (args.Parameters[0].ToLower())
             {
                 case "set":
                     if (args.Parameters.Count < 2)
@@ -358,7 +358,7 @@ namespace ComfyEconomy
                 return;
             }
 
-            switch (args.Parameters[0])
+            switch (args.Parameters[0].ToLower())
             {
                 case "post":
                     {
@@ -407,6 +407,7 @@ namespace ComfyEconomy
                         ComfyEconomy.DBManager.SaveAccount(owner.AccountName, owner.Balance - payment);
 
                         plr.SendSuccessMessage("Successfully posted the job!");
+                        LogManager.Log("Command", owner.AccountName, $"Executed /job post {itemId} {stack} {payment}");
                         break;
                     }
                 case "apply":
@@ -452,11 +453,12 @@ namespace ComfyEconomy
                         NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, NetworkText.FromLiteral(plr.SelectedItem.Name), plr.Index, plr.TPlayer.selectedItem);
                         NetMessage.SendData((int)PacketTypes.PlayerSlot, plr.Index, -1, NetworkText.FromLiteral(plr.SelectedItem.Name), plr.Index, plr.TPlayer.selectedItem);
 
-                        Account claimer = ComfyEconomy.DBManager.GetAccount(plr.Name);
-                        ComfyEconomy.DBManager.SaveAccount(plr.Name, claimer.Balance + job.Payment);
+                        Account applier = ComfyEconomy.DBManager.GetAccount(plr.Name);
+                        ComfyEconomy.DBManager.SaveAccount(plr.Name, applier.Balance + job.Payment);
                         ComfyEconomy.DBManager.UpdateJob(job.JobID, job.ItemID, job.Stack, job.Payment, false);
 
                         plr.SendSuccessMessage($"Successfully applied to the job! (+{job.Payment} balance)");
+                        LogManager.Log("Command", applier.AccountName, $"Executed /job apply {job.JobID}");
                         break;
                     }
                 case "delete":    //job delete <job ID>
@@ -503,6 +505,7 @@ namespace ComfyEconomy
                         ComfyEconomy.DBManager.SaveAccount(owner.AccountName, owner.Balance + job.Payment);
                         ComfyEconomy.DBManager.DeleteJob(jobId);
 
+                        LogManager.Log("Command", owner.AccountName, $"Executed /job delete {jobId}");
                         plr.SendSuccessMessage("Successfully deleted the job!");
                         break;
                     }
@@ -557,6 +560,8 @@ namespace ComfyEconomy
                             plr.GiveItem(j.ItemID, j.Stack);
                             ComfyEconomy.DBManager.DeleteJob(j.JobID);
                         }
+
+                        LogManager.Log("Command", args.Player.Name, $"Executed /job claim");
                     }
 
                     break;
