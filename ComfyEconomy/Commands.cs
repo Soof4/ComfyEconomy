@@ -102,13 +102,7 @@ namespace ComfyEconomy
                     LogManager.Log("Command", args.Player.Name, $"Executed /baladmin sub {amount} {plrAccount.AccountName}");
                     return;
                 default:
-                    args.Player.SendErrorMessage("Subcommand not found.\n" +
-                        "Command usage: /baladmin [subcommand] [amount] [player name]\n" +
-                        "Subcommand list:\n" +
-                        "set: Sets player's balance to the amount.\n" +
-                        "add: Adds some amount of points to the player's balance.\n" +
-                        "sub: Subtracts some amount of points from the player's balance."
-                        );
+                    Help_BalanceAdminCmd(args);
                     return;
             }
         }
@@ -321,16 +315,8 @@ namespace ComfyEconomy
                         }
                     }
                     break;
-                case "help":
-                    plr.SendInfoMessage("Sub-Commands:\n" +
-                                        "set <1/2>: Sets points before defining a new mine.\n" +
-                                        "define <tile ID> <paint ID> <name>: Defines a new mine. You must set two points before using this command.\n" +
-                                        "list: Shows a list of all the mines.\n" +
-                                        "delete <name>: Deletes a mine\n" +
-                                        "refill <name>: Refill a mine");
-                    break;
                 default:
-                    plr.SendErrorMessage("Invalid sub-command. (Valid ones are set/define/list/refill/help)");
+                    Help_MineCmd(args);
                     break;
             }
         }
@@ -345,7 +331,8 @@ namespace ComfyEconomy
 
                 if (accounts.Count == 0) message = "List is empty!";
 
-                foreach (Account a in accounts) {
+                foreach (Account a in accounts)
+                {
                     message += $"{1}. {a.AccountName} : {a.Balance}";
                 }
 
@@ -565,23 +552,41 @@ namespace ComfyEconomy
                     }
 
                     break;
-                case "help":
-                    {
-                        plr.SendInfoMessage("Sub-commands and their definitions:\n" +
-                                            "/job post <item name or ID> <stack> <payment> : Posts a job.\n" +
-                                            "/job apply <job ID> : Apply for a job. Applying for a job means that you already have the required item in your hand.\n" +
-                                            "/job delete <job ID> : Delete your job and get a refund.\n" +
-                                            "/job list [page number] : Shows a list of active jobs.\n" +
-                                            "/job claim : Claim your items from the completed jobs.\n" +
-                                            "/job help : Shows this message.");
-                        break;
-                    }
                 default:
-                    {
-                        plr.SendErrorMessage("Invalid sub-command. Do \"/job help\" to see them all.");
-                        break;
-                    }
+                    Help_JobCommand(args);
+                    break;
             }
         }
+
+        private static void Help_BalanceAdminCmd(CommandArgs args)
+        {
+            args.Player.SendInfoMessage("Command usage: /baladmin <subcommand> <amount> <player name>\n" +
+                                        "Sub-Commands:\n" +
+                                        "set: Sets player's balance to the amount.\n" +
+                                        "add: Adds some amount of points to the player's balance.\n" +
+                                        "sub: Subtracts some amount of points from the player's balance.");
+        }
+
+        private static void Help_MineCmd(CommandArgs args)
+        {
+            args.Player.SendInfoMessage("Sub-Commands:\n" +
+                                        "/mine set <1/2>: Sets points before defining a new mine.\n" +
+                                        "/mine define <tile ID> <paint ID> <name>: Defines a new mine. You must set two points before using this command.\n" +
+                                        "/mine list: Shows a list of all the mines.\n" +
+                                        "/mine delete <name>: Deletes a mine\n" +
+                                        "/mine refill <name>: Refill a mine");
+        }
+
+        private static void Help_JobCommand(CommandArgs args)
+        {
+            args.Player.SendInfoMessage("Sub-Commands:\n" +
+                                        "/job post <item name or ID> <stack> <payment> : Posts a job.\n" +
+                                        "/job apply <job ID> : Apply for a job. Applying for a job means that you already have the required item in your hand.\n" +
+                                        "/job delete <job ID> : Delete your job and get a refund.\n" +
+                                        "/job list [page number] : Shows a list of active jobs.\n" +
+                                        "/job claim : Claim your items from the completed jobs.\n" +
+                                        "/job help : Shows this message.");
+        }
+
     }
 }
