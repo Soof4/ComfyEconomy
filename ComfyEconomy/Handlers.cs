@@ -109,7 +109,7 @@ namespace ComfyEconomy
             // Detect shop sign -> standardize text -> change sign -> send packet
             if (newText.StartsWith("-Buy-") || newText.StartsWith("-S-Buy-") || newText.StartsWith("-S-Sell-") || newText.StartsWith("-S-Command-") || newText.StartsWith("-S-Trade-"))
             {
-                newText = ShopSign.StandardizeText(newText, args.Player);
+                newText = Utils.StandardizeText(newText, args.Player);
                 Main.sign[signId].text = newText;
                 TSPlayer.All.SendData(PacketTypes.SignNew, newText, signId, posX, posY);
                 args.Handled = true;
@@ -124,7 +124,7 @@ namespace ComfyEconomy
             args.Data.Seek(0, SeekOrigin.Begin);
             int posX = args.Data.ReadInt16();
             int posY = args.Data.ReadInt16();
-            int signID = ShopSign.GetSignIdByPos(posX, posY);
+            int signID = Utils.GetSignIdByPos(posX, posY);
 
             if (signID == -1) return;    // If sign is new -> return
 
@@ -132,8 +132,8 @@ namespace ComfyEconomy
 
             if (text.StartsWith("-Buy-") && !text.EndsWith(args.Player.Name))
             {
-                BuySign sign = ShopSign.GetBuySign(text);
-                int chestID = ShopSign.GetChestIdByPos(posX, posY + 2);
+                BuySign sign = BuySign.GetBuySign(text);
+                int chestID = Utils.GetChestIdByPos(posX, posY + 2);
                 if (chestID == -1)
                 {
                     Utils.SendFloatingMsg(args.Player, "This sign is not connected to a chest!", 255, 50, 50);
@@ -145,22 +145,22 @@ namespace ComfyEconomy
             }
             else if (text.StartsWith("-S-Buy-"))
             {
-                ServerBuySign sign = ShopSign.GetServerBuySign(text);
+                ServerBuySign sign = ServerBuySign.GetServerBuySign(text);
                 sign.Buy(args.Player);
             }
             else if (text.StartsWith("-S-Sell-"))
             {
-                ServerSellSign sign = ShopSign.GetServerSellSign(text);
+                ServerSellSign sign = ServerSellSign.GetServerSellSign(text);
                 sign.Sell(args.Player);
             }
             else if (text.StartsWith("-S-Command-"))
             {
-                CommandSign sign = ShopSign.GetCommandSign(text);
+                CommandSign sign = CommandSign.GetCommandSign(text);
                 sign.ExecuteCommand(args.Player);
             }
             else if (text.StartsWith("-S-Trade-"))
             {
-                TradeSign sign = ShopSign.GetTradeSign(text);
+                TradeSign sign = TradeSign.GetTradeSign(text);
                 sign.Trade(args.Player);
             }
             else

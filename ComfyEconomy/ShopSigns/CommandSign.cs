@@ -32,5 +32,16 @@ namespace ComfyEconomy
 
             LogManager.Log("Server-Command-Sign", buyerAccount.AccountName, $"Executed {Command}");
         }
+
+        public static CommandSign GetCommandSign(string text)
+        {    //TODO: Update this, get rid of numbers, something more readable
+            string[] lines = text.Split('\n');
+
+            return new CommandSign(
+                   lines[1][9..],                                         // read command
+                   int.Parse(lines[3][7..])                               // read the price
+                   );
+
+        }
     }
 }

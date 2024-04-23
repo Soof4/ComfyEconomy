@@ -54,5 +54,16 @@ namespace ComfyEconomy
 
             LogManager.Log("Server-Sell-Sign", sellerAccount.AccountName, $"Sold {Amount} {TShock.Utils.GetItemById(ItemID).Name}");
         }
+
+        public static ServerSellSign GetServerSellSign(string text)
+        {
+            string[] lines = text.Split('\n');
+
+            return new ServerSellSign(
+                   int.Parse(lines[1][(lines[1].LastIndexOf('#') + 1)..]),      // read item id that is after the pound (#) sign
+                   int.Parse(lines[2][8..]),                                    // read the amount
+                   int.Parse(lines[3][7..])                                     // read the price
+                   );
+        }
     }
 }

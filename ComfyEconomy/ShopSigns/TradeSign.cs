@@ -52,5 +52,17 @@ namespace ComfyEconomy
 
             LogManager.Log("Server-Trade-Sign", buyer.Name, $"Traded {ReqAmount} {TShock.Utils.GetItemById(ReqItemID).Name} in for {Amount} {TShock.Utils.GetItemById(ItemID).Name}");
         }
+
+        public static TradeSign GetTradeSign(string text)
+        {
+            string[] lines = text.Split("\n");
+
+            return new TradeSign(
+                   int.Parse(lines[1][(lines[1].LastIndexOf('#') + 1)..]),
+                   int.Parse(lines[2][8..]),
+                   int.Parse(lines[3][(lines[3].LastIndexOf('#') + 1)..]),
+                   int.Parse(lines[4][20..])
+                   );
+        }
     }
 }
