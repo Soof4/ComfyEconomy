@@ -80,24 +80,33 @@ namespace ComfyEconomy
                 return;
             }
 
+            // Find the online player, this'll be used for sending a message
+            TSPlayer? plr = null;
+            List<TSPlayer> plrList = TSPlayer.FindByNameOrID($"tsn:{plrAccount.AccountName}");
+            if (plrList.Count > 0) plr = plrList[0];
+
+            // Execute the sub-command
             switch (args.Parameters[0].ToLower())
             {
                 case "set":
                     ComfyEconomy.DBManager.SaveAccount(plrName, amount);
                     args.Player.SendSuccessMessage($"Successfully set {plrName}'s balance as {amount}.");
 
+                    if (plr != null) plr.SendInfoMessage($"{args.Player.Name} has set your balance as {amount}.");
                     LogManager.Log("Command", args.Player.Name, $"Executed /baladmin set {amount} {plrAccount.AccountName}");
                     return;
                 case "add":
                     ComfyEconomy.DBManager.SaveAccount(plrName, plrAccount.Balance + amount);
                     args.Player.SendSuccessMessage($"Successfully added {amount} to {plrName}'s balance.");
 
+                    if (plr != null) plr.SendInfoMessage($"{args.Player.Name} has added {amount} to your balance.");
                     LogManager.Log("Command", args.Player.Name, $"Executed /baladmin add {amount} {plrAccount.AccountName}");
                     return;
                 case "sub":
                     ComfyEconomy.DBManager.SaveAccount(plrName, plrAccount.Balance - amount);
                     args.Player.SendSuccessMessage($"Successfully subtracted {amount} from {plrName}'s balance.");
 
+                    if (plr != null) plr.SendInfoMessage($"{args.Player.Name} has substracted {amount} from your balance.");
                     LogManager.Log("Command", args.Player.Name, $"Executed /baladmin sub {amount} {plrAccount.AccountName}");
                     return;
                 default:
