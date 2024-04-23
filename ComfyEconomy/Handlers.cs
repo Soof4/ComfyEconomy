@@ -132,7 +132,7 @@ namespace ComfyEconomy
 
             if (text.StartsWith("-Buy-") && !text.EndsWith(args.Player.Name))
             {
-                ShopSign.ItemSign sign = ShopSign.GetItemSign(text);
+                BuySign sign = ShopSign.GetBuySign(text);
                 int chestID = ShopSign.GetChestIdByPos(posX, posY + 2);
                 if (chestID == -1)
                 {
@@ -145,22 +145,22 @@ namespace ComfyEconomy
             }
             else if (text.StartsWith("-S-Buy-"))
             {
-                ShopSign.ItemSign sign = ShopSign.GetItemSign(text);
-                sign.ServerBuy(args.Player);
+                ServerBuySign sign = ShopSign.GetServerBuySign(text);
+                sign.Buy(args.Player);
             }
             else if (text.StartsWith("-S-Sell-"))
             {
-                ShopSign.ItemSign sign = ShopSign.GetItemSign(text);
-                sign.ServerSell(args.Player);
+                ServerSellSign sign = ShopSign.GetServerSellSign(text);
+                sign.Sell(args.Player);
             }
             else if (text.StartsWith("-S-Command-"))
             {
-                ShopSign.CommandSign sign = ShopSign.GetCommandSign(text);
+                CommandSign sign = ShopSign.GetCommandSign(text);
                 sign.ExecuteCommand(args.Player);
             }
             else if (text.StartsWith("-S-Trade-"))
             {
-                ShopSign.TradeSign sign = ShopSign.GetTradeSign(text);
+                TradeSign sign = ShopSign.GetTradeSign(text);
                 sign.Trade(args.Player);
             }
             else

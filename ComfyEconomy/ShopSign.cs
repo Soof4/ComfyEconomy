@@ -8,206 +8,7 @@ namespace ComfyEconomy.Database
 {
     public class ShopSign
     {
-
-        public class ItemSign
-        {
-            public int ItemID;
-            public int Amount;
-            public int Price;
-            public string? Owner;
-
-            public ItemSign(int itemID, int amount, int price, string? owner = null)
-            {
-                ItemID = itemID;
-                Amount = amount;
-                Price = price;
-                Owner = owner;
-            }
-
-            public void Buy(TSPlayer buyer, int chestID)
-            {
-                int stock = 0;
-
-                foreach (Item item in Main.chest[chestID].item)
-                {
-                    if (item.netID == ItemID)
-                    {
-                        stock += item.stack;
-                    }
-                }
-
-                if (stock < Amount)
-                {
-                    Utils.SendFloatingMsg(buyer, "Ran out of stock!", 255, 50, 50);
-                    return;
-                }
-
-                Account sellerAccount;
-                Account buyerAccount = ComfyEconomy.DBManager.GetAccount(buyer.Name);
-                try
-                {
-                    sellerAccount = ComfyEconomy.DBManager.GetAccount(Owner);
-                }
-                catch (NullReferenceException)
-                {
-                    Utils.SendFloatingMsg(buyer, "Couldn't find the owner!", 255, 50, 50);
-                    return;
-                }
-
-                if (buyerAccount.Balance < Price)
-                {
-                    Utils.SendFloatingMsg(buyer, "You don't have enough money!", 255, 50, 50);
-                    return;
-                }
-
-                ComfyEconomy.DBManager.SaveAccount(buyer.Name, buyerAccount.Balance - Price);
-                buyer.GiveItem(ItemID, Amount);
-                DeleteItemsFromChest(chestID, ItemID, Amount);
-                ComfyEconomy.DBManager.SaveAccount(sellerAccount.AccountName, sellerAccount.Balance + Price);
-
-                Utils.SendFloatingMsg(buyer, $"Bought {Amount} {TShock.Utils.GetItemById(ItemID).Name}", 50, 255, 50);
-
-                LogManager.Log("Buy-Sign", buyerAccount.AccountName, $"Bought {Amount} {TShock.Utils.GetItemById(ItemID).Name} from {Owner}");
-            }
-
-            public void ServerBuy(TSPlayer buyer)
-            {
-                Account buyerAccount = ComfyEconomy.DBManager.GetAccount(buyer.Name);
-
-                if (buyerAccount.Balance < Price)
-                {
-                    Utils.SendFloatingMsg(buyer, "You don't have enough money!", 255, 50, 50);
-                    return;
-                }
-
-                ComfyEconomy.DBManager.SaveAccount(buyer.Name, buyerAccount.Balance - Price);
-                buyer.GiveItem(ItemID, Amount);
-
-                Utils.SendFloatingMsg(buyer, $"Bought {Amount} {TShock.Utils.GetItemById(ItemID).Name}", 50, 255, 50);
-
-                LogManager.Log("Server-Buy-Sign", buyerAccount.AccountName, $"Bought {Amount} {TShock.Utils.GetItemById(ItemID).Name}");
-            }
-
-            public void ServerSell(TSPlayer seller)
-            {
-                if (seller.SelectedItem.netID != ItemID)
-                {
-                    Utils.SendFloatingMsg(seller, "Item doesn't match!", 255, 50, 50);
-                    return;
-                }
-                if (seller.SelectedItem.stack < Amount)
-                {
-                    Utils.SendFloatingMsg(seller, "You don't have enough!", 255, 50, 50);
-                    return;
-                }
-
-                foreach (Item item in Main.item)
-                {
-                    if (item != null && item.active && item.stack == seller.SelectedItem.stack &&
-                        item.netID == ItemID && item.prefix == seller.SelectedItem.prefix &&
-                        item.position.WithinRange(seller.TPlayer.position, 16 * 40))
-                    {
-                        Utils.SendFloatingMsg(seller, "You dropped the item!", 255, 50, 50);
-                        return;
-                    }
-                }
-
-                Account sellerAccount = ComfyEconomy.DBManager.GetAccount(seller.Name);
-
-                seller.SelectedItem.stack -= Amount;
-
-                NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, NetworkText.FromLiteral(seller.SelectedItem.Name), seller.Index, seller.TPlayer.selectedItem);
-                NetMessage.SendData((int)PacketTypes.PlayerSlot, seller.Index, -1, NetworkText.FromLiteral(seller.SelectedItem.Name), seller.Index, seller.TPlayer.selectedItem);
-
-                ComfyEconomy.DBManager.SaveAccount(seller.Name, sellerAccount.Balance + Price);
-
-                Utils.SendFloatingMsg(seller, $"Sold {Amount} {TShock.Utils.GetItemById(ItemID).Name}", 50, 255, 50);
-
-                LogManager.Log("Server-Sell-Sign", sellerAccount.AccountName, $"Sold {Amount} {TShock.Utils.GetItemById(ItemID).Name}");
-            }
-        }
-
-        public class CommandSign
-        {
-            public string Command;
-            public int Price;
-
-            public CommandSign(string command, int price)
-            {
-                Command = command;
-                Price = price;
-            }
-
-            public void ExecuteCommand(TSPlayer buyer)
-            {
-                Account buyerAccount = ComfyEconomy.DBManager.GetAccount(buyer.Name);
-
-                if (buyerAccount.Balance < Price)
-                {
-                    Utils.SendFloatingMsg(buyer, "You don't have enough money!", 255, 50, 50);
-                    return;
-                }
-
-                ComfyEconomy.DBManager.SaveAccount(buyer.Name, buyerAccount.Balance - Price);
-                //TShockAPI.Commands.HandleCommand(TSPlayer.Server, Command);
-                Utils.ForceHandleCommand(buyer, Command);
-                Utils.SendFloatingMsg(buyer, $"Executed {Command}", 50, 255, 50);
-
-                LogManager.Log("Server-Command-Sign", buyerAccount.AccountName, $"Executed {Command}");
-            }
-        }
-
-        public class TradeSign
-        {
-            public int ItemID;
-            public int Amount;
-            public int ReqItemID;
-            public int ReqAmount;
-
-            public TradeSign(int itemID, int amount, int reqItemID, int reqAmount)
-            {
-                ItemID = itemID;
-                Amount = amount;
-                ReqItemID = reqItemID;
-                ReqAmount = reqAmount;
-            }
-
-            public void Trade(TSPlayer buyer)
-            {
-                if (buyer.SelectedItem.netID != ReqItemID)
-                {
-                    Utils.SendFloatingMsg(buyer, "Item doesn't match!", 255, 50, 50);
-                    return;
-                }
-                if (buyer.SelectedItem.stack < ReqAmount)
-                {
-                    Utils.SendFloatingMsg(buyer, "You don't have enough!", 255, 50, 50);
-                    return;
-                }
-
-                foreach (Item item in Main.item)
-                {
-                    if (item != null && item.active && item.stack == buyer.SelectedItem.stack &&
-                        item.netID == ReqItemID && item.prefix == buyer.SelectedItem.prefix &&
-                        item.position.WithinRange(buyer.TPlayer.position, 16 * 40))
-                    {
-                        Utils.SendFloatingMsg(buyer, "You dropped the item!", 255, 50, 50);
-                        return;
-                    }
-                }
-
-                buyer.SelectedItem.stack -= ReqAmount;
-                NetMessage.SendData((int)PacketTypes.PlayerSlot, -1, -1, NetworkText.FromLiteral(buyer.SelectedItem.Name), buyer.Index, buyer.TPlayer.selectedItem);
-                NetMessage.SendData((int)PacketTypes.PlayerSlot, buyer.Index, -1, NetworkText.FromLiteral(buyer.SelectedItem.Name), buyer.Index, buyer.TPlayer.selectedItem);
-                buyer.GiveItem(ItemID, Amount);
-
-                Utils.SendFloatingMsg(buyer, $"Bought {Amount} {TShock.Utils.GetItemById(ItemID).Name}", 50, 255, 50);
-
-                LogManager.Log("Server-Trade-Sign", buyer.Name, $"Traded {ReqAmount} {TShock.Utils.GetItemById(ReqItemID).Name} in for {Amount} {TShock.Utils.GetItemById(ItemID).Name}");
-            }
-        }
-
-        private static void DeleteItemsFromChest(int chestID, int itemID, int amount)
+        public static void DeleteItemsFromChest(int chestID, int itemID, int amount)
         {
             for (int i = 0; i < 40; i++)
             {
@@ -377,25 +178,38 @@ namespace ComfyEconomy.Database
             }
         }
 
-        public static ItemSign GetItemSign(string text)
+        public static BuySign GetBuySign(string text)
         {
             string[] lines = text.Split('\n');
 
-            if (lines[0].Equals("-Buy-") || lines[0].Equals("-Sell-"))
-            {
-                return new ItemSign(
-                       int.Parse(lines[1][(lines[1].LastIndexOf('#') + 1)..]),  // read item id that is after the pound (#) sign
-                       int.Parse(lines[2][8..]),                                // read the amount
-                       int.Parse(lines[3][7..]),                                // read the price
-                       lines[4][7..]                                            // read the owner
-                       );
-            }
-            return new ItemSign(
+            return new BuySign(
+                   int.Parse(lines[1][(lines[1].LastIndexOf('#') + 1)..]),  // read item id that is after the pound (#) sign
+                   int.Parse(lines[2][8..]),                                // read the amount
+                   int.Parse(lines[3][7..]),                                // read the price
+                   lines[4][7..]                                            // read the owner
+                   );
+        }
+
+        public static ServerBuySign GetServerBuySign(string text)
+        {
+            string[] lines = text.Split('\n');
+
+            return new ServerBuySign(
                    int.Parse(lines[1][(lines[1].LastIndexOf('#') + 1)..]),      // read item id that is after the pound (#) sign
                    int.Parse(lines[2][8..]),                                    // read the amount
                    int.Parse(lines[3][7..])                                     // read the price
                    );
+        }
 
+        public static ServerSellSign GetServerSellSign(string text)
+        {
+            string[] lines = text.Split('\n');
+
+            return new ServerSellSign(
+                   int.Parse(lines[1][(lines[1].LastIndexOf('#') + 1)..]),      // read item id that is after the pound (#) sign
+                   int.Parse(lines[2][8..]),                                    // read the amount
+                   int.Parse(lines[3][7..])                                     // read the price
+                   );
         }
 
         public static CommandSign GetCommandSign(string text)
@@ -420,7 +234,7 @@ namespace ComfyEconomy.Database
                    int.Parse(lines[4][20..])
                    );
         }
-        
+
         public static int GetSignIdByPos(int x, int y)
         {
             for (int i = 0; i < 1000; i++)
@@ -444,6 +258,5 @@ namespace ComfyEconomy.Database
             }
             return -1;
         }
-
     }
 }
