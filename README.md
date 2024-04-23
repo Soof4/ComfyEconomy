@@ -7,7 +7,8 @@ A TShock economy plugin.
 | comfyeco.bal.check | bal, balance           |
 | comfyeco.bal.admin | baladmin, balanceadmin |
 | comfyeco.pay       | pay                    |
-| comfyeco.addmine   | addmine                |
+| comfyeco.mine      | addmine                |
+| comfyeco.job       | job                    |
 
 | Permissions         | Function                                                          |
 |---------------------|-------------------------------------------------------------------|
