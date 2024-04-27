@@ -55,6 +55,8 @@ namespace ComfyEconomy
 
         private static void BalanceAdminCmd(CommandArgs args)
         {
+            #region Error handling and variable initialization
+
             if (args.Parameters.Count < 3)
             {
                 args.Player.SendErrorMessage("Not enough arguments were given to run the command. Usage: /baladmin [subcommand name] [amount] [player name]");
@@ -84,6 +86,8 @@ namespace ComfyEconomy
             TSPlayer? plr = null;
             List<TSPlayer> plrList = TSPlayer.FindByNameOrID($"tsn:{plrAccount.AccountName}");
             if (plrList.Count > 0) plr = plrList[0];
+
+            #endregion
 
             // Execute the sub-command
             switch (args.Parameters[0].ToLower())
@@ -117,6 +121,8 @@ namespace ComfyEconomy
 
         public static void BalanceCmd(CommandArgs args)
         {
+            #region Error handling and variable initialization
+
             int balance;
             string playerName = args.Player.Name;
 
@@ -140,11 +146,15 @@ namespace ComfyEconomy
                 return;
             }
 
+            #endregion
+
             args.Player.SendInfoMessage($"{playerName}'s balance is: {balance}");
         }
 
         public static void PayCmd(CommandArgs args)
         {
+            #region Error handling and variable initialization
+
             Account payer, paid;
             int amount;
 
@@ -156,57 +166,60 @@ namespace ComfyEconomy
                 return;
             }
 
-            if (int.TryParse(args.Parameters[^1], out amount))
-            {
-                if (amount < 0)
-                {
-                    args.Player.SendErrorMessage("Cannot pay in negative values.");
-                    return;
-                }
-                else if (amount > payer.Balance)
-                {
-                    args.Player.SendErrorMessage($"Cannot pay {amount}. Your balance is only: {payer.Balance}.");
-                    return;
-                }
-
-                try
-                {
-                    paid = ComfyEconomy.DBManager.GetAccount(string.Join(' ', args.Parameters.GetRange(0, args.Parameters.Count - 1)));
-                }
-                catch (NullReferenceException)
-                {
-                    args.Player.SendErrorMessage("Player not found.");
-                    return;
-                }
-
-                if (payer.AccountName.Equals(paid.AccountName))
-                {
-                    args.Player.SendErrorMessage("Cannot pay yourself.");
-                    return;
-                }
-
-                ComfyEconomy.DBManager.SaveAccount(payer.AccountName, payer.Balance - amount);
-                ComfyEconomy.DBManager.SaveAccount(paid.AccountName, paid.Balance + amount);
-
-                // Send success messages
-                args.Player.SendSuccessMessage($"You've paid {amount} to {paid.AccountName}.");
-
-                List<TSPlayer> paidTSPlayer = TSPlayer.FindByNameOrID($"tsn:{paid.AccountName}");
-                if (paidTSPlayer.Count > 0)
-                {
-                    paidTSPlayer[0].SendSuccessMessage($"{payer.AccountName} has paid you {amount}.");
-                }
-
-                LogManager.Log("Command", payer.AccountName, $"Executed /pay {paid.AccountName} {amount}");
-            }
-            else
+            if (!int.TryParse(args.Parameters[^1], out amount))
             {
                 args.Player.SendErrorMessage("Invalid amount of money.");
+                return;
             }
+
+            if (amount < 0)
+            {
+                args.Player.SendErrorMessage("Cannot pay in negative values.");
+                return;
+            }
+            else if (amount > payer.Balance)
+            {
+                args.Player.SendErrorMessage($"Cannot pay {amount}. Your balance is only: {payer.Balance}.");
+                return;
+            }
+
+            try
+            {
+                paid = ComfyEconomy.DBManager.GetAccount(string.Join(' ', args.Parameters.GetRange(0, args.Parameters.Count - 1)));
+            }
+            catch (NullReferenceException)
+            {
+                args.Player.SendErrorMessage("Player not found.");
+                return;
+            }
+
+            if (payer.AccountName.Equals(paid.AccountName))
+            {
+                args.Player.SendErrorMessage("Cannot pay yourself.");
+                return;
+            }
+
+            #endregion
+
+            ComfyEconomy.DBManager.SaveAccount(payer.AccountName, payer.Balance - amount);
+            ComfyEconomy.DBManager.SaveAccount(paid.AccountName, paid.Balance + amount);
+
+            // Send success messages
+            args.Player.SendSuccessMessage($"You've paid {amount} to {paid.AccountName}.");
+
+            List<TSPlayer> paidTSPlayer = TSPlayer.FindByNameOrID($"tsn:{paid.AccountName}");
+            if (paidTSPlayer.Count > 0)
+            {
+                paidTSPlayer[0].SendSuccessMessage($"{payer.AccountName} has paid you {amount}.");
+            }
+
+            LogManager.Log("Command", payer.AccountName, $"Executed /pay {paid.AccountName} {amount}");
         }
 
         public static void MineCmd(CommandArgs args)
         {
+            #region Error handling and variable initialization
+
             TSPlayer plr = args.Player;
 
             if (args.Parameters.Count < 1)
@@ -214,6 +227,8 @@ namespace ComfyEconomy
                 plr.SendErrorMessage("Missing the sub-command.");
                 return;
             }
+
+            #endregion
 
             switch (args.Parameters[0].ToLower())
             {
@@ -350,6 +365,8 @@ namespace ComfyEconomy
 
         public static void JobCmd(CommandArgs args)
         {
+            #region Error handling and variable initialization
+
             TSPlayer plr = args.Player;
 
             if (args.Parameters.Count < 1)
@@ -357,6 +374,8 @@ namespace ComfyEconomy
                 plr.SendErrorMessage("Missing the sub-command.");
                 return;
             }
+
+            #endregion
 
             switch (args.Parameters[0].ToLower())
             {
