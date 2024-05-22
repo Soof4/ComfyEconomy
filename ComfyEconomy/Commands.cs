@@ -235,7 +235,7 @@ namespace ComfyEconomy
                 case "set":
                     if (args.Parameters.Count < 2)
                     {
-                        plr.SendErrorMessage("You need to specify which point are you going to set. (1 or 2) (eg. /addmine set 1)");
+                        plr.SendErrorMessage("You need to specify which point are you going to set. (1 or 2) (eg. /mine set 1)");
                         return;
                     }
 
@@ -276,7 +276,7 @@ namespace ComfyEconomy
 
                     if (plr.TempPoints[0] == Point.Zero || plr.TempPoints[1] == Point.Zero)
                     {
-                        plr.SendErrorMessage("You need to set the points before using this sub-command. ");
+                        plr.SendErrorMessage("You need to set the points before using this sub-command.");
                         return;
                     }
 
@@ -322,7 +322,7 @@ namespace ComfyEconomy
                 case "refill":
                     if (args.Parameters.Count < 2)
                     {
-                        plr.SendErrorMessage("You need to specify the name of the mşne you want to refill.");
+                        plr.SendErrorMessage("You need to specify the name of the mine you want to refill.");
                         return;
                     }
 
