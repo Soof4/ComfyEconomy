@@ -352,11 +352,14 @@ namespace ComfyEconomy
                 List<Account> accounts = ComfyEconomy.DBManager.GetTop5Accounts();
                 accounts.Sort((a1, a2) => a2.Balance - a1.Balance);
 
-                if (accounts.Count == 0) message = "List is empty!";
-
-                foreach (Account a in accounts)
+                if (accounts.Count == 0)
                 {
-                    message += $"{1}. {a.AccountName} : {a.Balance}";
+                    message = "List is empty!";
+                }
+                else
+                {
+                    int i = 1;
+                    message = string.Join("\n", accounts.Select(a => $"{i++}. {a.AccountName} : {a.Balance}"));
                 }
 
                 args.Player.SendInfoMessage(message);
