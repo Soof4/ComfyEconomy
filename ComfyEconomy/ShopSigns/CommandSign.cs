@@ -17,6 +17,8 @@ namespace ComfyEconomy
 
         public void ExecuteCommand(TSPlayer buyer)
         {
+            if (Utils.IsSignInteractionInCooldown(buyer.Index)) return;
+
             Account buyerAccount = ComfyEconomy.DBManager.GetAccount(buyer.Name);
 
             if (buyerAccount.Balance < Price)

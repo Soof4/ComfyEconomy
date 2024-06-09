@@ -27,7 +27,6 @@ namespace ComfyEconomy
             return player.TileX <= mine.PosX2 && player.TileX + 1 >= mine.PosX1 && player.TileY + 2 >= mine.PosY1 && player.TileY <= mine.PosY2;
         }
 
-
         public static void DeleteItemsFromChest(int chestID, int itemID, int amount)
         {
             for (int i = 0; i < 40; i++)
@@ -220,6 +219,24 @@ namespace ComfyEconomy
                 }
             }
             return -1;
+        }
+
+        public static bool IsSignInteractionInCooldown(int playerIndex)
+        {
+            if (ComfyEconomy.ShopSignInteractionTimestamps.ContainsKey(playerIndex))
+            {
+                if ((DateTime.UtcNow - ComfyEconomy.ShopSignInteractionTimestamps[playerIndex]).TotalMilliseconds < 800)
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                ComfyEconomy.ShopSignInteractionTimestamps.Add(playerIndex, DateTime.UtcNow);
+            }
+
+            ComfyEconomy.ShopSignInteractionTimestamps[playerIndex] = DateTime.UtcNow;
+            return false;
         }
     }
 }

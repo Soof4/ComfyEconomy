@@ -21,6 +21,8 @@ namespace ComfyEconomy
 
         public void Trade(TSPlayer buyer)
         {
+            if (Utils.IsSignInteractionInCooldown(buyer.Index)) return;
+
             if (buyer.SelectedItem.netID != ReqItemID)
             {
                 Utils.SendFloatingMsg(buyer, "Item doesn't match!", 255, 50, 50);

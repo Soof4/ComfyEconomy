@@ -14,7 +14,7 @@ namespace ComfyEconomy
 
         public ComfyEconomy(Main game) : base(game) { }
         public override string Name => "ComfyEconomy";
-        public override Version Version => new Version(1, 5, 1);
+        public override Version Version => new Version(1, 5, 2);
         public override string Author => "Soofa";
         public override string Description => "Economy plugin with shop signs and mines.";
 
@@ -24,6 +24,7 @@ namespace ComfyEconomy
         private static IDbConnection DB = new SqliteConnection("Data Source=" + Path.Combine(TShock.SavePath, "ComfyEconomy.sqlite"));
         public static DbManager DBManager = new DbManager(DB);
         public static Configuration Config = Configuration.Reload();
+        public static Dictionary<int, DateTime> ShopSignInteractionTimestamps = new Dictionary<int, DateTime>();
 
         public override void Initialize()
         {

@@ -59,7 +59,7 @@ namespace ComfyEconomy
 
             if (args.Parameters.Count < 3)
             {
-                args.Player.SendErrorMessage("Not enough arguments were given to run the command. Usage: /baladmin [subcommand name] [amount] [player name]");
+                Help_BalanceAdminCmd(args);
                 return;
             }
 
@@ -258,7 +258,7 @@ namespace ComfyEconomy
 
                     if (args.Parameters.Count < 3)
                     {
-                        plr.SendErrorMessage("Missing arguments. Usage: /mine <tile ID> <paint ID> <name>");
+                        plr.SendErrorMessage("Missing arguments. Usage: /mine define <tile ID> <paint ID> <name>");
                         return;
                     }
 

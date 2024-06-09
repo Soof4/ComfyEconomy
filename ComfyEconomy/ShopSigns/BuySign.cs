@@ -20,6 +20,8 @@ namespace ComfyEconomy
         }
         public void Buy(TSPlayer buyer, int chestID)
         {
+            if (Utils.IsSignInteractionInCooldown(buyer.Index)) return;
+            
             int stock = 0;
 
             foreach (Item item in Main.chest[chestID].item)
