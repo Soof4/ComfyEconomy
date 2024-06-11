@@ -34,6 +34,8 @@ namespace ComfyEconomy
 
             Mines = DBManager.GetAllMines();
             Config = Configuration.Reload();
+
+            UpdateManager.CheckUpdateVerbose(this);
         }
         protected override void Dispose(bool disposing)
         {
