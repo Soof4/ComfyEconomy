@@ -44,7 +44,7 @@ namespace ComfyEconomy
             bool minesRefilled = false;
 
             if (activePlrCount > 0) TSPlayer.All.SendMessage("[i:3509]  Refilling the mines. Possible lag spike.", 255, 153, 204);
-            
+
             // Check if there are any active players in any of the mines
             if (!ForceNextMineRefill)
             {
@@ -102,11 +102,15 @@ namespace ComfyEconomy
             string newText = args.Data.ReadString();
 
             // Check against region protections
-            IEnumerable<TShockAPI.DB.Region> region = TShock.Regions.InAreaRegion(posX, posY);
-            if (region.Any() && !region.First().Owner.Equals(args.Player.Name)) return;
+            // IEnumerable<TShockAPI.DB.Region> regions = TShock.Regions.InAreaRegion(posX, posY);
+            if (!args.Player.HasBuildPermissionForTileObject(posX, posY, 2, 2, false)) return;
 
             // Detect shop sign -> standardize text -> change sign -> send packet
-            if (newText.StartsWith("-Buy-") || newText.StartsWith("-S-Buy-") || newText.StartsWith("-S-Sell-") || newText.StartsWith("-S-Command-") || newText.StartsWith("-S-Trade-"))
+            if (newText.StartsWith("-Buy-") ||
+                newText.StartsWith("-S-Buy-") ||
+                newText.StartsWith("-S-Sell-") ||
+                newText.StartsWith("-S-Command-") ||
+                newText.StartsWith("-S-Trade-"))
             {
                 newText = Utils.StandardizeText(newText, args.Player);
                 Main.sign[signId].text = newText;
