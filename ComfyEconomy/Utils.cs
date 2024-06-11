@@ -52,24 +52,33 @@ namespace ComfyEconomy
 
         public static string StandardizeText(string text, TSPlayer player)
         {
+            // Get rid of \r\n
+            text = text.Replace("\r", "");
 
             // Replace semi-colons with new-line char (semi-colon syntax is targeted for mobile because mobile players can't type in new-line char)
-            text = text.Replace("; ", "\n");
-            text = text.Replace(';', '\n');
+            text = text.Replace(";", "\n");
 
             // Get lines
             string[] signContent = text.Split('\n');
+
             if (signContent.Count() < 4)
             {
                 return "-Error-\nMissing lines.";
             }
 
+            // Trim lines
+            for (int i = 0; i < signContent.Length; i++)
+            {
+                signContent[i] = signContent[i].Trim();
+            }
 
+            // Check for server sign permission
             if (signContent[0].StartsWith("-S-") && !player.HasPermission("comfyeco.serversign"))
             {
                 return "-Error-\nYou don't have permission to use this tag.";
             }
 
+            // Find the sign tag and standardize the text
             switch (signContent[0])
             {  // sign tag
                 case "-Buy-":
