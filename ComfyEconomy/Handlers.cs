@@ -15,6 +15,7 @@ namespace ComfyEconomy
         {
             ServerApi.Hooks.NetGreetPlayer.Register(registrator, OnNetGreetPlayer);
             ServerApi.Hooks.GameUpdate.Register(registrator, OnGameUpdate);
+            ServerApi.Hooks.GamePostInitialize.Register(registrator, OnGamePostInitialize);
             GetDataHandlers.Sign += OnSignChange;
             GetDataHandlers.SignRead += OnSignRead;
             GeneralHooks.ReloadEvent += OnReload;
@@ -24,11 +25,16 @@ namespace ComfyEconomy
         {
             ServerApi.Hooks.NetGreetPlayer.Deregister(registrator, OnNetGreetPlayer);
             ServerApi.Hooks.GameUpdate.Deregister(registrator, OnGameUpdate);
+            ServerApi.Hooks.GamePostInitialize.Deregister(registrator, OnGamePostInitialize);
             GetDataHandlers.Sign -= OnSignChange;
             GetDataHandlers.SignRead -= OnSignRead;
             GeneralHooks.ReloadEvent -= OnReload;
         }
 
+        private static void OnGamePostInitialize(EventArgs args)
+        {
+            UpdateManager.CheckUpdateVerbose(ComfyEconomy.Instance);
+        }
 
         public static void OnReload(ReloadEventArgs args)
         {

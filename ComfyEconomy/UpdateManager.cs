@@ -1,3 +1,4 @@
+using System.Drawing;
 using IL.Terraria.GameContent;
 using Newtonsoft.Json;
 using TerrariaApi.Server;
@@ -35,7 +36,7 @@ namespace ComfyEconomy
                 }
                 catch
                 {
-                    Console.WriteLine("An error occured during checking for ComfyEconomy update.");
+                    Utils.Console_WriteLine("An error occured during checking for ComfyEconomy update.", ConsoleColor.Red);
                 }
             }
 
@@ -49,17 +50,24 @@ namespace ComfyEconomy
 
             return latestVersion != null && curVersion == latestVersion;
         }
-    
-        public static async void CheckUpdateVerbose(TerrariaPlugin plugin) {
-            TSPlayer.Server.SendInfoMessage("Checking for ComfyEconomy updates...");
+
+        public static async void CheckUpdateVerbose(TerrariaPlugin? plugin)
+        {
+            if (plugin == null) return;
+
+            Utils.Console_WriteLine("Checking for ComfyEconomy updates...", ConsoleColor.White);
+
             bool isUpToDate = await IsUpToDate(plugin);
 
-            if (isUpToDate) {
-                TSPlayer.Server.SendSuccessMessage("ComfyEconomy is up to date!");
+            if (isUpToDate)
+            {
+                Utils.Console_WriteLine("ComfyEconomy is up to date!", ConsoleColor.Green);
             }
-            else {
-                TSPlayer.Server.SendErrorMessage("ComfyEconomy is not up to date.\n" +
-                "Please visit https://github.com/Soof4/ComfyEconomy/releases/latest to download the latest version.");
+            else
+            {
+                Utils.Console_WriteLine("ComfyEconomy is not up to date.\n" +
+                                        "Please visit https://github.com/Soof4/ComfyEconomy/releases/latest to download the latest version.",
+                                        ConsoleColor.Red);
             }
         }
     }

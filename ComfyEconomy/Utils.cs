@@ -247,5 +247,12 @@ namespace ComfyEconomy
             ComfyEconomy.ShopSignInteractionTimestamps[playerIndex] = DateTime.UtcNow;
             return false;
         }
+
+        public static void Console_WriteLine(string text, ConsoleColor color)
+        {
+            Console.ForegroundColor = color;
+            Console.WriteLine(text);
+            Console.ResetColor();
+        }
     }
 }

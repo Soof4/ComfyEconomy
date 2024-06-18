@@ -14,12 +14,12 @@ namespace ComfyEconomy
 
         public ComfyEconomy(Main game) : base(game) { }
         public override string Name => "ComfyEconomy";
-        public override Version Version => new Version(1, 5, 3);
+        public override Version Version => new Version(1, 5, 4);
         public override string Author => "Soofa";
         public override string Description => "Economy plugin with shop signs and mines.";
 
         #endregion
-
+        public static TerrariaPlugin? Instance;
         public static List<Mine> Mines = new List<Mine>();
         private static IDbConnection DB = new SqliteConnection("Data Source=" + Path.Combine(TShock.SavePath, "ComfyEconomy.sqlite"));
         public static DbManager DBManager = new DbManager(DB);
@@ -34,8 +34,7 @@ namespace ComfyEconomy
 
             Mines = DBManager.GetAllMines();
             Config = Configuration.Reload();
-
-            UpdateManager.CheckUpdateVerbose(this);
+            Instance = this;
         }
         protected override void Dispose(bool disposing)
         {
