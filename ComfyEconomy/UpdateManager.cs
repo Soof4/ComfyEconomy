@@ -36,7 +36,7 @@ namespace ComfyEconomy
                 }
                 catch
                 {
-                    Utils.Console_WriteLine("An error occured during checking for ComfyEconomy update.", ConsoleColor.Red);
+                    Utils.Console_WriteLine("[ComfyEconomy] An error occured while checking for updates.", ConsoleColor.Red);
                 }
             }
 
@@ -48,24 +48,24 @@ namespace ComfyEconomy
             Version? latestVersion = await RequestLatestVersion();
             Version curVersion = plugin.Version;
 
-            return latestVersion != null && curVersion == latestVersion;
+            return latestVersion != null && curVersion >= latestVersion;
         }
 
         public static async void CheckUpdateVerbose(TerrariaPlugin? plugin)
         {
             if (plugin == null) return;
 
-            Utils.Console_WriteLine("Checking for ComfyEconomy updates...", ConsoleColor.White);
+            Utils.Console_WriteLine("[ComfyEconomy] Checking for updates...", ConsoleColor.White);
 
             bool isUpToDate = await IsUpToDate(plugin);
 
             if (isUpToDate)
             {
-                Utils.Console_WriteLine("ComfyEconomy is up to date!", ConsoleColor.Green);
+                Utils.Console_WriteLine("[ComfyEconomy] The plugin is up to date!", ConsoleColor.Green);
             }
             else
             {
-                Utils.Console_WriteLine("ComfyEconomy is not up to date.\n" +
+                Utils.Console_WriteLine("[ComfyEconomy] The plugin is not up to date.\n" +
                                         "Please visit https://github.com/Soof4/ComfyEconomy/releases/latest to download the latest version.",
                                         ConsoleColor.Red);
             }
