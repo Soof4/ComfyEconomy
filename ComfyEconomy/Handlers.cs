@@ -141,36 +141,71 @@ namespace ComfyEconomy
 
             if (text.StartsWith("-Buy-") && !text.EndsWith(args.Player.Name))
             {
-                BuySign sign = BuySign.GetBuySign(text);
-                int chestID = Utils.GetChestIdByPos(posX, posY + 2);
-                if (chestID == -1)
+                if (ShopSignCooldownService.IsInCooldownForPlayer(args.Player, signID, text))
                 {
-                    Utils.SendFloatingMsg(args.Player, "This sign is not connected to a chest!", 255, 50, 50);
+                    Utils.SendFloatingMsg(args.Player, "In cooldown!", 255, 50, 50);
                 }
                 else
                 {
-                    sign.Buy(args.Player, chestID);
+                    BuySign sign = BuySign.GetBuySign(text);
+                    int chestID = Utils.GetChestIdByPos(posX, posY + 2);
+                    if (chestID == -1)
+                    {
+                        Utils.SendFloatingMsg(args.Player, "This sign is not connected to a chest!", 255, 50, 50);
+                    }
+                    else
+                    {
+                        sign.Buy(args.Player, chestID);
+                    }
                 }
             }
             else if (text.StartsWith("-S-Buy-"))
             {
-                ServerBuySign sign = ServerBuySign.GetServerBuySign(text);
-                sign.Buy(args.Player);
+                if (ShopSignCooldownService.IsInCooldownForPlayer(args.Player, signID, text))
+                {
+                    Utils.SendFloatingMsg(args.Player, "In cooldown!", 255, 50, 50);
+                }
+                else
+                {
+                    ServerBuySign sign = ServerBuySign.GetServerBuySign(text);
+                    sign.Buy(args.Player);
+                }
             }
             else if (text.StartsWith("-S-Sell-"))
             {
-                ServerSellSign sign = ServerSellSign.GetServerSellSign(text);
-                sign.Sell(args.Player);
+                if (ShopSignCooldownService.IsInCooldownForPlayer(args.Player, signID, text))
+                {
+                    Utils.SendFloatingMsg(args.Player, "In cooldown!", 255, 50, 50);
+                }
+                else
+                {
+                    ServerSellSign sign = ServerSellSign.GetServerSellSign(text);
+                    sign.Sell(args.Player);
+                }
             }
             else if (text.StartsWith("-S-Command-"))
             {
-                CommandSign sign = CommandSign.GetCommandSign(text);
-                sign.ExecuteCommand(args.Player);
+                if (ShopSignCooldownService.IsInCooldownForPlayer(args.Player, signID, text))
+                {
+                    Utils.SendFloatingMsg(args.Player, "In cooldown!", 255, 50, 50);
+                }
+                else
+                {
+                    CommandSign sign = CommandSign.GetCommandSign(text);
+                    sign.ExecuteCommand(args.Player);
+                }
             }
             else if (text.StartsWith("-S-Trade-"))
             {
-                TradeSign sign = TradeSign.GetTradeSign(text);
-                sign.Trade(args.Player);
+                if (ShopSignCooldownService.IsInCooldownForPlayer(args.Player, signID, text))
+                {
+                    Utils.SendFloatingMsg(args.Player, "In cooldown!", 255, 50, 50);
+                }
+                else
+                {
+                    TradeSign sign = TradeSign.GetTradeSign(text);
+                    sign.Trade(args.Player);
+                }
             }
             else
             {

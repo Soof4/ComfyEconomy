@@ -78,8 +78,176 @@ namespace ComfyEconomy
                 return "-Error-\nYou don't have permission to use this tag.";
             }
 
+            // Check for cooldown            
+            string[] firstLine = signContent[0].Trim().Split(' ');
+            string cooldown = "";
+            bool hasCooldown = false;
+
+            if (firstLine.Length > 1)
+            {
+                if (firstLine.Contains("global"))
+                {
+                    cooldown += "GlobalCooldown: ";
+
+                    int hour = 0;
+                    int min = 0;
+                    int sec = 0;
+
+                    if (firstLine.Length == 2) return "-Error-\nYou need to provide time after the global keyword. <number>h <number>m <number>s";
+
+                    foreach (string tw in firstLine[2..])
+                    {
+                        if (tw.EndsWith('h'))
+                        {
+                            int h = 0;
+
+                            if (int.TryParse(tw[..^1], out h))
+                            {
+                                hour += h;
+                            }
+                            else
+                            {
+                                return "-Error-\nInvalid time syntax. Valid syntax is: <number>h <number>m <number>s";
+                            }
+                        }
+                        else if (tw.EndsWith('m'))
+                        {
+                            int m = 0;
+
+                            if (int.TryParse(tw[..^1], out m))
+                            {
+                                min += m;
+                            }
+                            else
+                            {
+                                return "-Error-\nInvalid time syntax. Valid syntax is: <number>h <number>m <number>s";
+                            }
+                        }
+                        else if (tw.EndsWith('s'))
+                        {
+                            int s = 0;
+
+                            if (int.TryParse(tw[..^1], out s))
+                            {
+                                sec += s;
+                            }
+                            else
+                            {
+                                return "-Error-\nInvalid time syntax. Valid syntax is: <number>h <number>m <number>s";
+                            }
+                        }
+                        else
+                        {
+                            return "-Error-\nInvalid time syntax. Valid syntax is: <number>h <number>m <number>s";
+                        }
+                    }
+
+                    if (hour < 0 || min < 0 || sec < 0)
+                    {
+                        return "-Error-\nCan't have negative time values.";
+                    }
+
+                    if (hour > 0)
+                    {
+                        cooldown += $"{hour}h ";
+                    }
+                    if (min > 0)
+                    {
+                        cooldown += $"{min}m ";
+                    }
+                    if (sec > 0)
+                    {
+                        cooldown += $"{sec}s ";
+                    }
+
+                    hasCooldown = true;
+                }
+                else    // Individual cooldown
+                {
+                    cooldown += "Cooldown: ";
+
+                    int hour = 0;
+                    int min = 0;
+                    int sec = 0;
+
+                    foreach (string tw in firstLine[1..])
+                    {
+                        if (tw.EndsWith('h'))
+                        {
+                            int h = 0;
+
+                            if (int.TryParse(tw[..^1], out h))
+                            {
+                                hour += h;
+                            }
+                            else
+                            {
+                                return "-Error-\nInvalid time syntax. Valid syntax is: <number>h <number>m <number>s";
+                            }
+                        }
+                        else if (tw.EndsWith('m'))
+                        {
+                            int m = 0;
+
+                            if (int.TryParse(tw[..^1], out m))
+                            {
+                                min += m;
+                            }
+                            else
+                            {
+                                return "-Error-\nInvalid time syntax. Valid syntax is: <number>h <number>m <number>s";
+                            }
+                        }
+                        else if (tw.EndsWith('s'))
+                        {
+                            int s = 0;
+
+                            if (int.TryParse(tw[..^1], out s))
+                            {
+                                sec += s;
+                            }
+                            else
+                            {
+                                return "-Error-\nInvalid time syntax. Valid syntax is: <number>h <number>m <number>s";
+                            }
+                        }
+                        else
+                        {
+                            return "-Error-\nInvalid time syntax. Valid syntax is: <number>h <number>m <number>s";
+                        }
+                    }
+
+                    if (hour < 0 || min < 0 || sec < 0)
+                    {
+                        return "-Error-\nCan't have negative time values.";
+                    }
+
+                    if (hour > 0)
+                    {
+                        cooldown += $"{hour}h ";
+                    }
+                    if (min > 0)
+                    {
+                        cooldown += $"{min}m ";
+                    }
+                    if (sec > 0)
+                    {
+                        cooldown += $"{sec}s ";
+                    }
+
+                    hasCooldown = true;
+                }
+            }
+
+            string parsedTag = firstLine.First();
+
+            if (hasCooldown)
+            {
+                parsedTag += " " + cooldown;
+            }
+
             // Find the sign tag and standardize the text
-            switch (signContent[0])
+            switch (firstLine.First())
             {  // sign tag
                 case "-Buy-":
                     {
@@ -103,7 +271,7 @@ namespace ComfyEconomy
                             return "-Error-\nInvalid price.";
                         }
 
-                        return $"-Buy-\n" +
+                        return $"{parsedTag}\n" +
                                 $"Name: {itemList[0].Name} #{itemList[0].netID}\n" +
                                 $"Amount: {amount} \n" +
                                 $"Price: {price} \n" +
@@ -131,7 +299,7 @@ namespace ComfyEconomy
                             return "-Error-\nInvalid price.";
                         }
 
-                        return $"-S-Buy-\n" +
+                        return $"{parsedTag}\n" +
                                 $"Name: {itemList[0].Name} #{itemList[0].netID}\n" +
                                 $"Amount: {amount} \n" +
                                 $"Price: {price}";
@@ -158,7 +326,7 @@ namespace ComfyEconomy
                             return "-Error-\nInvalid price.";
                         }
 
-                        return $"-S-Sell-\n" +
+                        return $"{parsedTag}\n" +
                                 $"Name: {itemList[0].Name} #{itemList[0].netID}\n" +
                                 $"Amount: {amount}\n" +
                                 $"Price: {price}";
@@ -172,7 +340,7 @@ namespace ComfyEconomy
                             return "-Error-\nInvalid price.";
                         }
 
-                        return $"-S-Command-\n" +
+                        return $"{parsedTag}\n" +
                                 $"Command: {signContent[1]}\n" +
                                 $"Description: {signContent[2]}\n" +
                                 $"Price: {price}";
@@ -196,7 +364,7 @@ namespace ComfyEconomy
                             return "-Error-\nAmount cannot exceed max stack amount of the item or can't be lower than 0.";
                         }
 
-                        return $"-S-Trade-\n" +
+                        return $"{parsedTag}\n" +
                                 $"Name: {itemList[0].Name} #{itemList[0].netID}\n" +
                                 $"Amount: {amount}\n" +
                                 $"Requirement: {reqItemList[0].Name} #{reqItemList[0].netID}\n" +
@@ -234,7 +402,7 @@ namespace ComfyEconomy
         {
             if (ComfyEconomy.ShopSignInteractionTimestamps.ContainsKey(playerIndex))
             {
-                if ((DateTime.UtcNow - ComfyEconomy.ShopSignInteractionTimestamps[playerIndex]).TotalMilliseconds < 800)
+                if ((DateTime.UtcNow - ComfyEconomy.ShopSignInteractionTimestamps[playerIndex]).TotalMilliseconds < 600)
                 {
                     return true;
                 }
