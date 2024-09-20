@@ -28,9 +28,10 @@ namespace ComfyEconomy
             }
 
             ComfyEconomy.DBManager.SaveAccount(buyer.Name, buyerAccount.Balance - Price);
-            //TShockAPI.Commands.HandleCommand(TSPlayer.Server, Command);
-            Utils.ForceHandleCommand(buyer, Command);
-            Utils.SendFloatingMsg(buyer, $"Executed {Command}", 50, 255, 50);
+            string command = Command.Replace("%playername%", buyer.Name);
+
+            Utils.ForceHandleCommand(buyer, command);
+            Utils.SendFloatingMsg(buyer, $"Executed {command}", 50, 255, 50);
 
             LogManager.Log("Server-Command-Sign", buyerAccount.AccountName, $"Executed {Command}");
         }
