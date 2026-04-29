@@ -1,6 +1,7 @@
 ﻿using MySql.Data.MySqlClient;
 using System.Data;
 using TShockAPI.DB;
+using TShockAPI.DB.Queries;
 
 namespace ComfyEconomy.Database
 {
@@ -12,7 +13,7 @@ namespace ComfyEconomy.Database
         {
             _db = db;
 
-            var sqlCreator = new SqlTableCreator(db, new SqliteQueryCreator());
+            var sqlCreator = new SqlTableCreator(db, new SqliteQueryBuilder());
 
             sqlCreator.EnsureTableStructure(new SqlTable("Accounts",
                 new SqlColumn("AccountName", MySqlDbType.String) { Primary = true, Unique = true },

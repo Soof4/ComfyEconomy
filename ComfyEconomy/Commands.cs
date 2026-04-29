@@ -395,7 +395,7 @@ namespace ComfyEconomy
                         try
                         {
                             item = TShock.Utils.GetItemByIdOrName(string.Join(" ", args.Parameters.GetRange(1, args.Parameters.Count - 3)))[0];
-                            itemId = item.netID;
+                            itemId = item.type;
                             stack = int.Parse(args.Parameters[^2]);
                             payment = int.Parse(args.Parameters[^1]);
                         }
@@ -459,7 +459,7 @@ namespace ComfyEconomy
                             return;
                         }
 
-                        if (plr.SelectedItem.netID != job.ItemID)
+                        if (plr.SelectedItem.type != job.ItemID)
                         {
                             plr.SendErrorMessage("The item you're holding doesn't match the job's.");
                             return;

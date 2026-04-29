@@ -26,7 +26,7 @@ namespace ComfyEconomy
 
             foreach (Item item in Main.chest[chestID].item)
             {
-                if (item.netID == ItemID)
+                if (item.type == ItemID)
                 {
                     stock += item.stack;
                 }

@@ -32,18 +32,18 @@ namespace ComfyEconomy
             for (int i = 0; i < 40; i++)
             {
                 Item item = Main.chest[chestID].item[i];
-                if (item.netID == itemID)
+                if (item.type == itemID)
                 {
                     if (item.stack < amount)
                     {
                         amount -= item.stack;
                         item.stack = 0;
-                        TSPlayer.All.SendData(PacketTypes.ChestItem, "", chestID, i, item.stack, item.prefix, item.netID);
+                        TSPlayer.All.SendData(PacketTypes.ChestItem, "", chestID, i, item.stack, item.prefix, item.type);
                     }
                     else
                     {
                         item.stack -= amount;
-                        TSPlayer.All.SendData(PacketTypes.ChestItem, "", chestID, i, item.stack, item.prefix, item.netID);
+                        TSPlayer.All.SendData(PacketTypes.ChestItem, "", chestID, i, item.stack, item.prefix, item.type);
                         break;
                     }
                 }
@@ -272,7 +272,7 @@ namespace ComfyEconomy
                         }
 
                         return $"{parsedTag}\n" +
-                                $"Name: {itemList[0].Name} #{itemList[0].netID}\n" +
+                                $"Name: {itemList[0].Name} #{itemList[0].type}\n" +
                                 $"Amount: {amount} \n" +
                                 $"Price: {price} \n" +
                                 $"Owner: {player.Name}";
@@ -300,7 +300,7 @@ namespace ComfyEconomy
                         }
 
                         return $"{parsedTag}\n" +
-                                $"Name: {itemList[0].Name} #{itemList[0].netID}\n" +
+                                $"Name: {itemList[0].Name} #{itemList[0].type}\n" +
                                 $"Amount: {amount} \n" +
                                 $"Price: {price}";
                     }
@@ -327,7 +327,7 @@ namespace ComfyEconomy
                         }
 
                         return $"{parsedTag}\n" +
-                                $"Name: {itemList[0].Name} #{itemList[0].netID}\n" +
+                                $"Name: {itemList[0].Name} #{itemList[0].type}\n" +
                                 $"Amount: {amount}\n" +
                                 $"Price: {price}";
                     }
@@ -365,9 +365,9 @@ namespace ComfyEconomy
                         }
 
                         return $"{parsedTag}\n" +
-                                $"Name: {itemList[0].Name} #{itemList[0].netID}\n" +
+                                $"Name: {itemList[0].Name} #{itemList[0].type}\n" +
                                 $"Amount: {amount}\n" +
-                                $"Requirement: {reqItemList[0].Name} #{reqItemList[0].netID}\n" +
+                                $"Requirement: {reqItemList[0].Name} #{reqItemList[0].type}\n" +
                                 $"Requirement Amount: {reqAmount}";
                     }
                 default: return "-Error-\nUnknown.";

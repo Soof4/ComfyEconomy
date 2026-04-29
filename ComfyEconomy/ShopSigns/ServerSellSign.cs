@@ -21,7 +21,7 @@ namespace ComfyEconomy
         {
             if (Utils.IsSignInteractionInCooldown(seller.Index)) return;
 
-            if (seller.SelectedItem.netID != ItemID)
+            if (seller.SelectedItem.type != ItemID)
             {
                 Utils.SendFloatingMsg(seller, "Item doesn't match!", 255, 50, 50);
                 return;
@@ -32,10 +32,10 @@ namespace ComfyEconomy
                 return;
             }
 
-            foreach (Item item in Main.item)
+            foreach (WorldItem item in Main.item)
             {
                 if (item != null && item.active && item.stack == seller.SelectedItem.stack &&
-                    item.netID == ItemID && item.prefix == seller.SelectedItem.prefix &&
+                    item.type == ItemID && item.inner.prefix == seller.SelectedItem.prefix &&
                     item.position.WithinRange(seller.TPlayer.position, 16 * 40))
                 {
                     Utils.SendFloatingMsg(seller, "You dropped the item!", 255, 50, 50);
